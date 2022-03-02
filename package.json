@@ -1,0 +1,22 @@
+{
+  "name": "beland-contracts",
+  "version": "1.0.0",
+  "description": "BeLand Contracts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/belandsoft/beland-contracts.git"
+  },
+  "author": "beland.developer@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/belandsoft/beland-contracts/issues"
+  },
+  "homepage": "https://github.com/belandsoft/beland-contracts#readme",
+  "devDependencies": {
+    "@openzeppelin/contracts": "^4.5.0"
+  }
+}
