@@ -57,7 +57,7 @@ contract Land is ERC721, Ownable {
     function setMetadata(uint256 landId, string memory data) external {
         require(
             _isApprovedOrOwner(_msgSender(), landId),
-            "ERC721: transfer caller is not owner nor approved"
+            "Land: transfer caller is not owner nor approved"
         );
         metadata[landId] = data;
         emit MetdataUpdate(landId, data);
