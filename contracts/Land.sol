@@ -8,9 +8,12 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Land is ERC721, Ownable {
+    uint256 public WIDTH = 300;
+    uint256 public HEIGHT = 300;
+
     mapping(address => bool) _minters;
     event MinterUpdate(address _minter, bool _isMinter);
-    event MetdataUpdate(uint256 landId, string data);
+    event MetadataUpdate(uint256 landId, string data);
 
     mapping(uint256 => string) public metadata;
 
@@ -27,6 +30,7 @@ contract Land is ERC721, Ownable {
      * @param landId: landId
      */
     function create(address user, uint256 landId) external onlyMinter {
+        require(landId <= WIDTH * HEIGHT, "Land: landId bigger than limit");
         _safeMint(user, landId);
     }
 
@@ -40,6 +44,10 @@ contract Land is ERC721, Ownable {
         onlyMinter
     {
         for (uint256 i = 0; i < landIds.length; i++) {
+            require(
+                landIds[i] <= WIDTH * HEIGHT,
+                "Land: landId bigger than limit"
+            );
             _safeMint(user, landIds[i]);
         }
     }
@@ -47,6 +55,14 @@ contract Land is ERC721, Ownable {
     function setMinter(address _minter, bool _isMinter) external onlyOwner {
         _minters[_minter] = _isMinter;
         emit MinterUpdate(_minter, _isMinter);
+    }
+
+    function x(uint256 landId) external view returns (uint256) {
+        return landId % WIDTH;
+    }
+
+    function y(uint256 landId) external view returns (uint256) {
+        return landId / HEIGHT;
     }
 
     /**
@@ -60,6 +76,6 @@ contract Land is ERC721, Ownable {
             "Land: transfer caller is not owner nor approved"
         );
         metadata[landId] = data;
-        emit MetdataUpdate(landId, data);
+        emit MetadataUpdate(landId, data);
     }
 }

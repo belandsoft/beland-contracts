@@ -18,6 +18,11 @@ contract("Land", ([owner, user]) => {
       this.land.create(owner, 10, { from: owner }),
       "ERC721: token already minted"
     );
+
+    await expectRevert(
+      this.land.create(owner, 90001, { from: owner }),
+      "Land: landId bigger than limit"
+    );
   });
 
   it("Batch Create", async () => {
@@ -29,6 +34,10 @@ contract("Land", ([owner, user]) => {
     await expectRevert(
       this.land.batchCreate(owner, [1], { from: owner }),
       "ERC721: token already minted"
+    );
+    await expectRevert(
+      this.land.batchCreate(owner, [7, 90001], { from: owner }),
+      "Land: landId bigger than limit"
     );
   });
 
