@@ -30,6 +30,11 @@ contract("LandPresale", ([owner, user, treasury, referrer]) => {
     assert.equal(await this.usdt.balanceOf(referrer), "1")
   })
 
+  it("Buy: 1 no referer", async () => {
+    await this.presale.buy([1], "0x0000000000000000000000000000000000000000");
+    assert.equal(await this.usdt.balanceOf(treasury), "100");
+  })
+
   it("Buy: 10", async () => {
     await this.presale.buy(generateLandIds(10), referrer); // price: 990
     assert.equal(await this.usdt.balanceOf(treasury), "981");
