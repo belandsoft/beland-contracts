@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract Scene is ERC721, ERC721URIStorage {
+contract Scene is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
@@ -34,7 +34,7 @@ contract Scene is ERC721, ERC721URIStorage {
      * @param sceneId: id of scene
      * @param tokenURI: token URI
      */
-    function deploy(uint256 sceneId, string memory tokenURI) {
+    function deploy(uint256 sceneId, string memory tokenURI) external {
         require(
             _isApprovedOrOwner(_msgSender(), sceneId),
             "ERC721: deploy caller is not owner nor approved"
