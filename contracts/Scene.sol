@@ -25,7 +25,7 @@ contract Scene is ERC721, ERC721URIStorage {
     function create(address user, string memory tokenURI) external {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
-        _mint(player, newItemId);
+        _mint(user, newItemId);
         _setTokenURI(newItemId, tokenURI);
     }
 
