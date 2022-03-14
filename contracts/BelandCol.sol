@@ -40,7 +40,8 @@ contract BelandCol is ERC721URIStorage, Ownable {
     mapping(uint256 => uint256) public tokenItemMap;
     // Base URI
     string public baseURI;
-
+    event ItemAdd(ItemParams[] _items);
+    event ItemEdit(uint256[] indexes, ItemParams[] _items);
     event MinterUpdate(address _minter, bool _isMinter);
     event Created(address user, uint256 tokenId, uint256 itemId);
     event SetApproved(bool _previousValue, bool _newValue);
@@ -85,7 +86,7 @@ contract BelandCol is ERC721URIStorage, Ownable {
     {
         require(
             newCreator != address(0),
-            "Ownable: new creator is the zero address"
+            "BelandCol: new creator is the zero address"
         );
         _transferCreatorship(newCreator);
     }
@@ -141,6 +142,7 @@ contract BelandCol is ERC721URIStorage, Ownable {
                 })
             );
         }
+        emit ItemAdd(_items);
     }
 
     /**
@@ -158,11 +160,12 @@ contract BelandCol is ERC721URIStorage, Ownable {
             Item storage item = items[_indexes[i]];
             require(
                 item.totalSupply <= _items[i].maxSupply,
-                "BelandCol: invalid max supply"
+                "BelandCol: max supply must be greater than total supply"
             );
             item.maxSupply = _items[i].maxSupply;
             item.tokenURI = _items[i].tokenURI;
         }
+        emit ItemEdit(_indexes, _items);
     }
 
     /**
@@ -229,5 +232,10 @@ contract BelandCol is ERC721URIStorage, Ownable {
      */
     function itemsLength() external view returns (uint256) {
         return items.length;
+    }
+
+    function itemOfToken(uint256 _tokenId) external view returns (Item memory) {
+        require(_exists(_tokenId), "tokenURI: INVALID_TOKEN_ID"); 
+        return items[tokenItemMap[_tokenId]];
     }
 }
