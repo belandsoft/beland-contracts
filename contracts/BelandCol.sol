@@ -82,6 +82,7 @@ contract BelandCol is ERC721URIStorage, Ownable {
     {
         require(isEditable, "BelandCol: not editable");
         for (uint256 i = 0; i < _indexes.length; i++) {
+            require(items.length > _indexes[i], "BelandCol: item not found");
             Item storage item = items[_indexes[i]];
             require(
                 item.totalSupply <= _items[i].maxSupply,
@@ -103,6 +104,7 @@ contract BelandCol is ERC721URIStorage, Ownable {
     }
 
     function _create(address user, uint256 itemIndex) private {
+        require(items.length > itemIndex, "BelandCol: item not found");
         require(
             items[itemIndex].totalSupply < items[itemIndex].maxSupply,
             "BelandCol: max supply"
