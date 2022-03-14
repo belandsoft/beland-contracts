@@ -15,7 +15,7 @@ contract Scene is ERC721URIStorage {
 
     event DeployNew(uint256 sceneId, string tokenURI);
 
-    constructor() public ERC721("Scene", "SCE") {}
+    constructor() ERC721("Scene", "SCE") {}
 
     /**
      * @notice Create Scene
