@@ -59,7 +59,7 @@ contract BelandCol is ERC721URIStorage, Ownable {
      * @param _items: list item params
      */
     function addItems(ItemParams[] memory _items) external onlyCreator {
-        require(!isEditable, "BelandCol: not editable");
+        require(isEditable, "BelandCol: not editable");
         for (uint256 i = 0; i < _items.length; i++) {
             items.push(
                 Item({
@@ -80,7 +80,7 @@ contract BelandCol is ERC721URIStorage, Ownable {
         external
         onlyCreator
     {
-        require(!isEditable, "BelandCol: not editable");
+        require(isEditable, "BelandCol: not editable");
         for (uint256 i = 0; i < _indexes.length; i++) {
             Item storage item = items[_indexes[i]];
             require(
