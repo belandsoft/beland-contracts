@@ -7,15 +7,23 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./libs/String.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
+interface IFactory {
+    function baseURI() external view returns (string memory);
+}
 
 contract BelandCol is ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
+    using String for address;
 
     bool public isApproved = false;
     bool public isEditable = true;
     address public creator;
     mapping(address => bool) _minters;
+    address public factory;
 
     struct ItemParams {
         uint256 maxSupply; // max supply
@@ -30,11 +38,17 @@ contract BelandCol is ERC721URIStorage, Ownable {
 
     Item[] public items;
     mapping(uint256 => uint256) public tokenItemMap;
+    // Base URI
+    string public baseURI;
 
     event MinterUpdate(address _minter, bool _isMinter);
     event Created(address user, uint256 tokenId, uint256 itemId);
     event SetApproved(bool _previousValue, bool _newValue);
     event SetEditable(bool _previousValue, bool _newValue);
+    event CreatorshipTransferred(
+        address indexed previousCreator,
+        address indexed newCreator
+    );
 
     modifier onlyMinter() {
         require(_minters[_msgSender()], "BelandCol: only minter");
@@ -52,6 +66,64 @@ contract BelandCol is ERC721URIStorage, Ownable {
         address _creator
     ) ERC721(_name, _symbol) {
         creator = _creator;
+        factory = _msgSender();
+    }
+
+    function setMinter(address _minter, bool _isMinter) external onlyCreator {
+        _minters[_minter] = _isMinter;
+        emit MinterUpdate(_minter, _isMinter);
+    }
+
+    /**
+     * @dev Transfers creatorship of the contract to a new account (`newCreator`).
+     * Can only be called by the current creator.
+     */
+    function transferCreatorship(address newCreator)
+        public
+        virtual
+        onlyCreator
+    {
+        require(
+            newCreator != address(0),
+            "Ownable: new creator is the zero address"
+        );
+        _transferCreatorship(newCreator);
+    }
+
+    /**
+     * @dev Transfers creatorship of the contract to a new account (`newCreator`).
+     * Internal function without access restriction.
+     */
+    function _transferCreatorship(address newCreator) internal virtual {
+        address oldCreator = creator;
+        creator = newCreator;
+        emit CreatorshipTransferred(oldCreator, creator);
+    }
+
+    /**
+     * @notice Returns an URI for a given token ID.
+     * Throws if the token ID does not exist. May return an empty string.
+     * @param _tokenId - uint256 ID of the token queried
+     * @return token URI
+     */
+    function tokenURI(uint256 _tokenId)
+        public
+        view
+        virtual
+        override
+        returns (string memory)
+    {
+        require(_exists(_tokenId), "tokenURI: INVALID_TOKEN_ID");
+        return
+            string(
+                abi.encodePacked(
+                    IFactory(factory).baseURI(),
+                    "0x",
+                    address(this).addressToString(),
+                    "/",
+                    Strings.toString(_tokenId)
+                )
+            );
     }
 
     /**
@@ -155,7 +227,7 @@ contract BelandCol is ERC721URIStorage, Ownable {
     /**
      * @notice Get the amount of items
      */
-    function itemsLenth() external view returns (uint256) {
+    function itemsLength() external view returns (uint256) {
         return items.length;
     }
 }

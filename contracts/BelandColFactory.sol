@@ -8,14 +8,19 @@ import "./BelandCol.sol";
 contract BelandColFactory is Ownable {
     address[] public collections;
     mapping(address => bool) public isCollectionFromFactory;
+    string public baseURI;
 
     event CollectionCreated(address indexed collectionAddr);
 
-    function create(string memory _name, string memory _symbol)
-        external
-        returns (address)
-    {
-        BelandCol belandCol = new BelandCol(_name, _symbol, _msgSender());
+    function create(
+        string memory _name,
+        string memory _symbol
+    ) external returns (address) {
+        BelandCol belandCol = new BelandCol(
+            _name,
+            _symbol,
+            _msgSender()
+        );
         address colAddr = address(belandCol);
         Ownable(colAddr).transferOwnership(owner());
         collections.push(colAddr);
@@ -30,5 +35,9 @@ contract BelandColFactory is Ownable {
      */
     function collectionsLength() external view returns (uint256) {
         return collections.length;
+    }
+
+    function setBaseURI(string memory _baseURI) external onlyOwner {
+        baseURI = _baseURI;
     }
 }
