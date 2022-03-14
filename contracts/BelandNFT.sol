@@ -52,12 +52,12 @@ contract BelandNFT is ERC721URIStorage, Ownable {
     );
 
     modifier onlyMinter() {
-        require(_minters[_msgSender()], "BelandCol: only minter");
+        require(_minters[_msgSender()], "BelandNFT: only minter");
         _;
     }
 
     modifier onlyCreator() {
-        require(creator == _msgSender(), "BelandCol: only creator");
+        require(creator == _msgSender(), "BelandNFT: only creator");
         _;
     }
 
@@ -86,7 +86,7 @@ contract BelandNFT is ERC721URIStorage, Ownable {
     {
         require(
             newCreator != address(0),
-            "BelandCol: new creator is the zero address"
+            "BelandNFT: new creator is the zero address"
         );
         _transferCreatorship(newCreator);
     }
@@ -132,7 +132,7 @@ contract BelandNFT is ERC721URIStorage, Ownable {
      * @param _items: list item params
      */
     function addItems(ItemParams[] memory _items) external onlyCreator {
-        require(isEditable, "BelandCol: not editable");
+        require(isEditable, "BelandNFT: not editable");
         for (uint256 i = 0; i < _items.length; i++) {
             items.push(
                 Item({
@@ -154,13 +154,13 @@ contract BelandNFT is ERC721URIStorage, Ownable {
         external
         onlyCreator
     {
-        require(isEditable, "BelandCol: not editable");
+        require(isEditable, "BelandNFT: not editable");
         for (uint256 i = 0; i < _indexes.length; i++) {
-            require(items.length > _indexes[i], "BelandCol: item not found");
+            require(items.length > _indexes[i], "BelandNFT: item not found");
             Item storage item = items[_indexes[i]];
             require(
                 item.totalSupply <= _items[i].maxSupply,
-                "BelandCol: max supply must be greater than total supply"
+                "BelandNFT: max supply must be greater than total supply"
             );
             item.maxSupply = _items[i].maxSupply;
             item.tokenURI = _items[i].tokenURI;
@@ -174,15 +174,15 @@ contract BelandNFT is ERC721URIStorage, Ownable {
      * @param itemIndex: idex of item
      */
     function create(address user, uint256 itemIndex) external onlyMinter {
-        require(isApproved, "BelandCol: not approved");
+        require(isApproved, "BelandNFT: not approved");
         _create(user, itemIndex);
     }
 
     function _create(address user, uint256 itemIndex) private {
-        require(items.length > itemIndex, "BelandCol: item not found");
+        require(items.length > itemIndex, "BelandNFT: item not found");
         require(
             items[itemIndex].totalSupply < items[itemIndex].maxSupply,
-            "BelandCol: max supply"
+            "BelandNFT: max supply"
         );
         _tokenIds.increment();
         uint256 newTokenId = _tokenIds.current();
@@ -201,7 +201,7 @@ contract BelandNFT is ERC721URIStorage, Ownable {
         external
         onlyMinter
     {
-        require(isApproved, "BelandCol: not approved");
+        require(isApproved, "BelandNFT: not approved");
         for (uint256 i = 0; i < itemIndexes.length; i++) {
             _create(user, itemIndexes[i]);
         }
@@ -212,7 +212,7 @@ contract BelandNFT is ERC721URIStorage, Ownable {
      * @param _value - Value to set
      */
     function setApproved(bool _value) external virtual onlyOwner {
-        require(isApproved != _value, "BelandCol: value is the same");
+        require(isApproved != _value, "BelandNFT: value is the same");
         emit SetApproved(isApproved, _value);
         isApproved = _value;
     }
@@ -222,7 +222,7 @@ contract BelandNFT is ERC721URIStorage, Ownable {
      * @param _value - Value to set
      */
     function setEditable(bool _value) external onlyOwner {
-        require(isEditable != _value, "BelandCol: value is the same");
+        require(isEditable != _value, "BelandNFT: value is the same");
         emit SetEditable(isEditable, _value);
         isEditable = _value;
     }
