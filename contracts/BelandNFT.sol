@@ -61,6 +61,14 @@ contract BelandNFT is ERC721URIStorage, Ownable {
         _;
     }
 
+    modifier onlyCreatorOrOwner() {
+        require(
+            creator == _msgSender() || owner() == _msgSender(),
+            "BelandNFT: only creator or owner"
+        );
+        _;
+    }
+
     constructor(
         string memory _name,
         string memory _symbol,
@@ -82,7 +90,7 @@ contract BelandNFT is ERC721URIStorage, Ownable {
     function transferCreatorship(address newCreator)
         public
         virtual
-        onlyCreator
+        onlyCreatorOrOwner
     {
         require(
             newCreator != address(0),
@@ -235,7 +243,7 @@ contract BelandNFT is ERC721URIStorage, Ownable {
     }
 
     function itemOfToken(uint256 _tokenId) external view returns (Item memory) {
-        require(_exists(_tokenId), "tokenURI: INVALID_TOKEN_ID"); 
+        require(_exists(_tokenId), "tokenURI: INVALID_TOKEN_ID");
         return items[tokenItemMap[_tokenId]];
     }
 }

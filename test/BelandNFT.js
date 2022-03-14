@@ -25,7 +25,7 @@ contract("Beland NFT", ([owner, user]) => {
     assert.equal(await this.col.creator(), user);
   })
   it("should not transfer creatorship", async () => {
-    await expectRevert(this.col.transferCreatorship(user, {from: user}), "BelandNFT: only creator");
+    await expectRevert(this.col.transferCreatorship(user, {from: user}), "BelandNFT: only creator or owner");
     await expectRevert(this.col.transferCreatorship("0x0000000000000000000000000000000000000000"), "BelandNFT: new creator is the zero address");
   })
 
