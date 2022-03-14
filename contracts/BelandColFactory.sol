@@ -18,9 +18,9 @@ contract BelandColFactory is Ownable {
         BelandCol belandCol = new BelandCol(_name, _symbol, _msgSender());
         address colAddr = address(belandCol);
         Ownable(colAddr).transferOwnership(owner());
-        emit CollectionCreated(colAddr);
         collections.push(colAddr);
         isCollectionFromFactory[colAddr] = true;
+        emit CollectionCreated(colAddr);
         return colAddr;
     }
 
