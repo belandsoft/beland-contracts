@@ -1,11 +1,11 @@
 const { assert } = require("chai");
 
-const BelandColFactory = artifacts.require("./BelandColFactory.sol");
-const BelandCoL = artifacts.require("./BelandCol.sol");
+const BelandColFactory = artifacts.require("./BelandNFTFactory.sol");
+const BelandCoL = artifacts.require("./BelandNFT.sol");
 const expectRevert = require("@openzeppelin/test-helpers/src/expectRevert");
 
 
-contract("Beland Collection", ([owner, user]) => {
+contract("Beland NFT", ([owner, user]) => {
   beforeEach(async () => {
     this.factory = await BelandColFactory.new();
     await this.factory.setBaseURI("beland.io/");

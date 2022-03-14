@@ -14,7 +14,7 @@ interface IFactory {
     function baseURI() external view returns (string memory);
 }
 
-contract BelandCol is ERC721URIStorage, Ownable {
+contract BelandNFT is ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     using String for address;

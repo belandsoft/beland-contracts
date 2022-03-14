@@ -3,9 +3,9 @@
 pragma solidity ^0.8.0;
 pragma abicoder v2;
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./BelandCol.sol";
+import "./BelandNFT.sol";
 
-contract BelandColFactory is Ownable {
+contract BelandNFTFactory is Ownable {
     address[] public collections;
     mapping(address => bool) public isCollectionFromFactory;
     string public baseURI;
@@ -16,17 +16,17 @@ contract BelandColFactory is Ownable {
         string memory _name,
         string memory _symbol
     ) external returns (address) {
-        BelandCol belandCol = new BelandCol(
+        BelandNFT nft = new BelandNFT(
             _name,
             _symbol,
             _msgSender()
         );
-        address colAddr = address(belandCol);
-        Ownable(colAddr).transferOwnership(owner());
-        collections.push(colAddr);
-        isCollectionFromFactory[colAddr] = true;
-        emit CollectionCreated(colAddr);
-        return colAddr;
+        address nftAddr = address(nft);
+        Ownable(nftAddr).transferOwnership(owner());
+        collections.push(nftAddr);
+        isCollectionFromFactory[nftAddr] = true;
+        emit CollectionCreated(nftAddr);
+        return nftAddr;
     }
 
     /**
