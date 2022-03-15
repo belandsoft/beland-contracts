@@ -152,19 +152,14 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
         IERC20 quote = IERC20(presale.quoteToken);
         // pay commission fee + protocol fee;
         uint256 price = presale.pricePerUnit.mul(_qty);
-        uint256 referralCommisionFee = _payReferralCommission(
-            _nft,
-            itemId,
-            price
-        );
+        uint256 refFee = _payReferralCommission(_nft, itemId, price);
         uint256 protocolFee = price.mul(feePercent).div(10000);
         if (protocolFee > 0) {
             quote.safeTransferFrom(_msgSender(), treasury, protocolFee);
         }
-        uint256 netPrice = price.sub(referralCommisionFee).sub(protocolFee);
+        uint256 netPrice = price.sub(refFee).sub(protocolFee);
         quote.safeTransferFrom(_msgSender(), presale.treasury, netPrice);
         IBelandNFT(_nft).batchCreate(_msgSender(), itemId, _qty);
-
         emit Buy(_nft, itemId, _qty);
     }
 
