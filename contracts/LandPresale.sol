@@ -6,6 +6,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 interface ILand {
     function batchCreate(address user, uint256[] memory landIds) external;
@@ -20,8 +22,9 @@ interface IReferral {
         external;
 }
 
-contract LandPresale is Context {
+contract LandPresale is Context, ReentrancyGuard {
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
     address public treasury;
     address public land;
@@ -55,7 +58,7 @@ contract LandPresale is Context {
      * @notice Buy buy land
      * @param landIds: ids of the land
      */
-    function buy(uint256[] memory landIds, address _referrer) external {
+    function buy(uint256[] memory landIds, address _referrer) external nonReentrant{
         require(startDate <= block.timestamp, "LandPrelale: not started");
         require(landIds.length > 0, "LandPrelale: invalid landIds");
         _recordReferral(_referrer);
@@ -66,7 +69,7 @@ contract LandPresale is Context {
         uint256 netPrice = price.sub(discount);
         uint256 commission = _payReferralCommission(netPrice);
         netPrice = netPrice.sub(commission);
-        IERC20(dealToken).transferFrom(_msgSender(), treasury, netPrice);
+        IERC20(dealToken).safeTransferFrom(_msgSender(), treasury, netPrice);
         ILand(land).batchCreate(_msgSender(), landIds);
         emit Buy(landIds);
     }
@@ -95,7 +98,7 @@ contract LandPresale is Context {
         address referrer = IReferral(referral).getReferrer(_msgSender());
         if (referrer != address(0)) {
             commission = amount.mul(referralCommision).div(10000);
-            IERC20(dealToken).transferFrom(_msgSender(), referrer, commission);
+            IERC20(dealToken).safeTransferFrom(_msgSender(), referrer, commission);
         }
     }
 }
