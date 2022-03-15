@@ -5,6 +5,7 @@ const Land = artifacts.require("./Land.sol");
 contract("Land", ([owner, user]) => {
   beforeEach(async () => {
     this.land = await Land.new();
+    await this.land.setBaseURI("beland.io/");
     await this.land.setMinter(owner, 1);
   });
 
@@ -18,6 +19,9 @@ contract("Land", ([owner, user]) => {
       this.land.create(owner, 10, { from: owner }),
       "ERC721: token already minted"
     );
+
+    const tokenURI = await this.land.tokenURI(10);
+    assert.equal(tokenURI, "beland.io/10");
 
     await expectRevert(
       this.land.create(owner, 90001, { from: owner }),

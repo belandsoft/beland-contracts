@@ -36,12 +36,12 @@ contract BelandNFT is ERC721URIStorage, Ownable {
         string tokenURI;
     }
 
+    mapping(uint256 => uint256) private _itemOfToken;
     Item[] public items;
-    mapping(uint256 => uint256) public tokenItemMap;
-    // Base URI
-    string public baseURI;
-    event ItemAdd(ItemParams[] _items);
-    event ItemEdit(uint256[] indexes, ItemParams[] _items);
+
+    // Events
+    event ItemsAdd(ItemParams[] _items);
+    event ItemsEdit(uint256[] indexes, ItemParams[] _items);
     event MinterUpdate(address _minter, bool _isMinter);
     event Created(address user, uint256 tokenId, uint256 itemId);
     event SetApproved(bool _previousValue, bool _newValue);
@@ -150,7 +150,7 @@ contract BelandNFT is ERC721URIStorage, Ownable {
                 })
             );
         }
-        emit ItemAdd(_items);
+        emit ItemsAdd(_items);
     }
 
     /**
@@ -173,7 +173,7 @@ contract BelandNFT is ERC721URIStorage, Ownable {
             item.maxSupply = _items[i].maxSupply;
             item.tokenURI = _items[i].tokenURI;
         }
-        emit ItemEdit(_indexes, _items);
+        emit ItemsEdit(_indexes, _items);
     }
 
     /**
@@ -195,7 +195,7 @@ contract BelandNFT is ERC721URIStorage, Ownable {
         _tokenIds.increment();
         uint256 newTokenId = _tokenIds.current();
         _mint(user, newTokenId);
-        tokenItemMap[newTokenId] = itemIndex;
+        _itemOfToken[newTokenId] = itemIndex;
         items[itemIndex].totalSupply++;
         emit Created(user, newTokenId, itemIndex);
     }
@@ -244,6 +244,6 @@ contract BelandNFT is ERC721URIStorage, Ownable {
 
     function itemOfToken(uint256 _tokenId) external view returns (Item memory) {
         require(_exists(_tokenId), "tokenURI: INVALID_TOKEN_ID");
-        return items[tokenItemMap[_tokenId]];
+        return items[_itemOfToken[_tokenId]];
     }
 }

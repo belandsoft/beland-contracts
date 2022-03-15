@@ -6,11 +6,12 @@ pragma abicoder v2;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract Land is ERC721, Ownable {
     uint256 public WIDTH = 300;
     uint256 public HEIGHT = 300;
-
+    string public baseURI;
     mapping(address => bool) _minters;
     event MinterUpdate(address _minter, bool _isMinter);
     event MetadataUpdate(uint256 landId, string data);
@@ -77,5 +78,26 @@ contract Land is ERC721, Ownable {
         );
         metadata[landId] = data;
         emit MetadataUpdate(landId, data);
+    }
+
+    function setBaseURI(string calldata __baseURI) external onlyOwner {
+        baseURI = __baseURI;
+    }
+
+    /**
+     * @notice Returns an URI for a given token ID.
+     * Throws if the token ID does not exist. May return an empty string.
+     * @param _tokenId - uint256 ID of the token queried
+     * @return token URI
+     */
+    function tokenURI(uint256 _tokenId)
+        public
+        view
+        virtual
+        override
+        returns (string memory)
+    {
+        require(_exists(_tokenId), "tokenURI: INVALID_TOKEN_ID");
+        return string(abi.encodePacked(baseURI, Strings.toString(_tokenId)));
     }
 }
