@@ -29,12 +29,42 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
     mapping(address => mapping(uint256 => Presale)) public presales;
     address public factory;
     address public treasury;
-    uint256 public feePrecent = 100; // 1%
+    uint256 public feePercent = 100; // 1%
     address public referral;
+    uint256 public maxFeePercent = 1000; // 10%;
 
     event PresaleCreated(address indexed nft, uint256 itemId, Presale);
     event PresaleCancel(address indexed nft, uint256 itemId);
     event Buy(address indexed nft, uint256 itemId, uint256 qty);
+    event FeePercentUpdated(uint256 feePercent);
+    event ReferalUpdated(address referral);
+    event TreasuryUpdated(address treasury);
+
+    constructor(
+        address _factory,
+        address _treasury,
+        address _referral
+    ) {
+        factory = _factory;
+        treasury = _treasury;
+        referral = _referral;
+    }
+
+    function setReferral(address _referral) external onlyOwner {
+        referral = _referral;
+        emit ReferalUpdated(_referral);
+    }
+
+    function setTreasury(address _treasury) external onlyOwner {
+        treasury = _treasury;
+        emit TreasuryUpdated(_treasury);
+    }
+
+    function setFeePercent(uint256 _percent) external onlyOwner {
+        require(_percent <= maxFeePercent, "BelandNFTPresale: max fee");
+        feePercent = _percent;
+        emit FeePercentUpdated(_percent);
+    }
 
     /**
      * @notice add presale
@@ -55,12 +85,16 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
         address _treasury
     ) external nonReentrant {
         require(
+            referralCommisionRate <= maxFeePercent,
+            "BelandNFTPresale: max fee percent"
+        );
+        require(
             endTime > block.timestamp,
-            "ERC721NFTAuction: endTime must be greater than block.timestamp"
+            "BelandNFTPresale: endTime must be greater than block.timestamp"
         );
         require(
             endTime > startTime,
-            "ERC721NFTAuction: endTime must be greater than startTime"
+            "BelandNFTPresale: endTime must be greater than startTime"
         );
         require(
             IBelandNFTFactory(factory).isCollectionFromFactory(_nft),
@@ -123,7 +157,7 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
             itemId,
             price
         );
-        uint256 protocolFee = price.mul(feePrecent).div(10000);
+        uint256 protocolFee = price.mul(feePercent).div(10000);
         if (protocolFee > 0) {
             IERC20(presale.quoteToken).safeTransferFrom(
                 _msgSender(),
