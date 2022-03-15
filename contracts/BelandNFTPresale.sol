@@ -149,7 +149,7 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
         Presale memory presale = presales[_nft][itemId];
         require(presale.hasExist, "BelandNFTPresale: presale found");
         _recordReferral(_referrer);
-
+        IERC20 quote = IERC20(presale.quoteToken);
         // pay commission fee + protocol fee;
         uint256 price = presale.pricePerUnit.mul(_qty);
         uint256 referralCommisionFee = _payReferralCommission(
@@ -159,18 +159,10 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
         );
         uint256 protocolFee = price.mul(feePercent).div(10000);
         if (protocolFee > 0) {
-            IERC20(presale.quoteToken).safeTransferFrom(
-                _msgSender(),
-                treasury,
-                protocolFee
-            );
+            quote.safeTransferFrom(_msgSender(), treasury, protocolFee);
         }
         uint256 netPrice = price.sub(referralCommisionFee).sub(protocolFee);
-        IERC20(presale.quoteToken).safeTransferFrom(
-            _msgSender(),
-            presale.treasury,
-            netPrice
-        );
+        quote.safeTransferFrom(_msgSender(), presale.treasury, netPrice);
         IBelandNFT(_nft).batchCreate(_msgSender(), itemId, _qty);
 
         emit Buy(_nft, itemId, _qty);
