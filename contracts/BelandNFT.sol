@@ -203,15 +203,17 @@ contract BelandNFT is ERC721URIStorage, Ownable {
     /**
      * @notice batch create nfts
      * @param user: address of user
-     * @param itemIndexes: list of item index
+     * @param itemId: item id
+     * @param qty: quantity
      */
-    function batchCreate(address user, uint256[] memory itemIndexes)
-        external
-        onlyMinter
-    {
+    function batchCreate(
+        address user,
+        uint256 itemId,
+        uint256 qty
+    ) external onlyMinter {
         require(isApproved, "BelandNFT: not approved");
-        for (uint256 i = 0; i < itemIndexes.length; i++) {
-            _create(user, itemIndexes[i]);
+        for (uint256 i = 0; i < qty; i++) {
+            _create(user, itemId);
         }
     }
 

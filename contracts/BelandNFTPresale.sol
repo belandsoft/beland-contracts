@@ -21,9 +21,8 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
         address quoteToken;
         uint256 pricePerUnit;
         uint256 referralCommisionRate;
-        uint256 startTime;
-        uint256 endTime;
         address treasury;
+        bool isEditable;
     }
 
     mapping(address => mapping(uint256 => Presale)) public presales;
@@ -79,8 +78,6 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
         uint256 itemId,
         address quoteToken,
         uint256 pricePerUnit,
-        uint256 startTime,
-        uint256 endTime,
         uint256 referralCommisionRate,
         address _treasury
     ) external nonReentrant {
@@ -89,13 +86,10 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
             "BelandNFTPresale: max fee percent"
         );
         require(
-            endTime > block.timestamp,
-            "BelandNFTPresale: endTime must be greater than block.timestamp"
+            pricePerUnit > 0,
+            "BelandNFTPresale: pricePerUnit must be greater zero"
         );
-        require(
-            endTime > startTime,
-            "BelandNFTPresale: endTime must be greater than startTime"
-        );
+        require(_treasury != address(0), "BelandNFTPresale: zero treasury");
         require(
             IBelandNFTFactory(factory).isCollectionFromFactory(_nft),
             "BelandNFTPresale: invalid nft"
@@ -105,18 +99,17 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
             "BelandNFTPresale: only creator"
         );
         require(
-            presales[_nft][itemId].hasExist,
+            !presales[_nft][itemId].hasExist,
             "BelandNFTPresale: presale found"
         );
 
         presales[_nft][itemId] = Presale({
             quoteToken: quoteToken,
             pricePerUnit: pricePerUnit,
-            startTime: startTime,
-            endTime: endTime,
             referralCommisionRate: referralCommisionRate,
             treasury: _treasury,
-            hasExist: true
+            hasExist: true,
+            isEditable: true
         });
 
         emit PresaleCreated(_nft, itemId, presales[_nft][itemId]);
@@ -124,12 +117,16 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
 
     function cancelPresale(address _nft, uint256 itemId) external nonReentrant {
         require(
+            presales[_nft][itemId].hasExist,
+            "BelandNFTPresale: not found"
+        );
+        require(
             IBelandNFT(_nft).creator() == _msgSender(),
             "BelandNFTPresale: only creator"
         );
         require(
-            presales[_nft][itemId].startTime > block.timestamp,
-            "BelandNFTPresale: presale started"
+            presales[_nft][itemId].isEditable,
+            "BelandNFTPresale: not editable"
         );
         delete presales[_nft][itemId];
         emit PresaleCancel(_nft, itemId);
@@ -147,7 +144,7 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
         address _referrer
     ) external nonReentrant {
         Presale memory presale = presales[_nft][itemId];
-        require(presale.hasExist, "BelandNFTPresale: presale found");
+        require(presale.hasExist, "BelandNFTPresale: presale not found");
         _recordReferral(_referrer);
         IERC20 quote = IERC20(presale.quoteToken);
         // pay commission fee + protocol fee;
@@ -160,6 +157,9 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
         uint256 netPrice = price.sub(refFee).sub(protocolFee);
         quote.safeTransferFrom(_msgSender(), presale.treasury, netPrice);
         IBelandNFT(_nft).batchCreate(_msgSender(), itemId, _qty);
+        if (presale.isEditable) {
+            presales[_nft][itemId].isEditable = false;
+        }
         emit Buy(_nft, itemId, _qty);
     }
 
