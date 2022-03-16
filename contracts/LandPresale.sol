@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface ILand {
     function batchCreate(address user, uint256[] memory landIds) external;
@@ -22,7 +23,7 @@ interface IReferral {
         external;
 }
 
-contract LandPresale is Context, ReentrancyGuard {
+contract LandPresale is Context, ReentrancyGuard, Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -54,11 +55,23 @@ contract LandPresale is Context, ReentrancyGuard {
         startDate = _startDate;
     }
 
+    function setReferralCommissionRate(uint256 _rate) external onlyOwner {
+        require(_rate <= 500, "max_rate");
+        referralCommision = _rate;
+    }
+
+    function setReferral(address _referral) external onlyOwner {
+        referral = _referral;
+    }
+
     /**
      * @notice Buy buy land
      * @param landIds: ids of the land
      */
-    function buy(uint256[] memory landIds, address _referrer) external nonReentrant{
+    function buy(uint256[] memory landIds, address _referrer)
+        external
+        nonReentrant
+    {
         require(startDate <= block.timestamp, "LandPrelale: not started");
         require(landIds.length > 0, "LandPrelale: invalid landIds");
         _recordReferral(_referrer);
@@ -95,10 +108,16 @@ contract LandPresale is Context, ReentrancyGuard {
         internal
         returns (uint256 commission)
     {
-        address referrer = IReferral(referral).getReferrer(_msgSender());
-        if (referrer != address(0)) {
-            commission = amount.mul(referralCommision).div(10000);
-            IERC20(dealToken).safeTransferFrom(_msgSender(), referrer, commission);
+        if (referralCommision > 0) {
+            address referrer = IReferral(referral).getReferrer(_msgSender());
+            if (referrer != address(0)) {
+                commission = amount.mul(referralCommision).div(10000);
+                IERC20(dealToken).safeTransferFrom(
+                    _msgSender(),
+                    referrer,
+                    commission
+                );
+            }
         }
     }
 }

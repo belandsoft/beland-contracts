@@ -174,9 +174,9 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
         address _nft,
         uint256 itemId,
         uint256 amount
-    ) internal returns (uint256 commission) {
-        Presale memory presale = presales[_nft][itemId];
+    ) private returns (uint256 commission) {
         if (referralCommisionRate > 0) {
+            Presale memory presale = presales[_nft][itemId];
             address referrer = IReferral(referral).getReferrer(_msgSender());
             if (referrer != address(0)) {
                 commission = amount.mul(referralCommisionRate).div(10000);
