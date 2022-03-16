@@ -100,6 +100,10 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
             "BelandNFTPresale: only creator"
         );
         require(
+            IBelandNFT(_nft).isApproved(),
+            "BelandNFTPresale: not approved"
+        );
+        require(
             !presales[_nft][itemId].hasExist,
             "BelandNFTPresale: presale found"
         );

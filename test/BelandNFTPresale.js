@@ -84,7 +84,13 @@ contract(
           cases[i][5]
         );
       }
-
+      await this.nft.setApproved(false);
+      await expectRevert(
+        this.presale.addPresale(...correctData),
+        "BelandNFTPresale: not approved"
+      );
+      
+      await this.nft.setApproved(true);
       await this.presale.addPresale(...correctData);
       await expectRevert(
         this.presale.addPresale(...correctData),
