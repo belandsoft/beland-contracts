@@ -35,7 +35,6 @@ contract(
         0,
         this.usdt.address,
         1000,
-        100,
         nftTreasury
       );
     }
@@ -46,9 +45,8 @@ contract(
       assert.equal(presale[0], true);
       assert.equal(presale[1], this.usdt.address);
       assert.equal(presale[2], 1000);
-      assert.equal(presale[3], 100);
-      assert.equal(presale[4], nftTreasury);
-      assert.equal(presale[5], true);
+      assert.equal(presale[3], nftTreasury);
+      assert.equal(presale[4], true);
     });
 
     it("should not add presale", async () => {
@@ -57,38 +55,33 @@ contract(
         0,
         this.usdt.address,
         100,
-        100,
         nftTreasury,
       ];
 
       let cases = [];
       const correct = [...correctData, "", owner];
       cases.push([...correct]);
-      cases[0][4] = 1001;
-      cases[0][6] = "BelandNFTPresale: max fee percent";
+      cases[0][3] = 0;
+      cases[0][5] = "BelandNFTPresale: pricePerUnit must be greater zero";
 
       cases.push([...correct]);
-      cases[1][3] = 0;
-      cases[1][6] = "BelandNFTPresale: pricePerUnit must be greater zero";
+      cases[1][4] = "0x0000000000000000000000000000000000000000";
+      cases[1][5] = "BelandNFTPresale: zero treasury";
 
       cases.push([...correct]);
-      cases[2][5] = "0x0000000000000000000000000000000000000000";
-      cases[2][6] = "BelandNFTPresale: zero treasury";
+      cases[2][0] = this.usdt.address;
+      cases[2][5] = "BelandNFTPresale: invalid nft";
 
       cases.push([...correct]);
-      cases[3][0] = this.usdt.address;
-      cases[3][6] = "BelandNFTPresale: invalid nft";
-
-      cases.push([...correct]);
-      cases[4][7] = user;
-      cases[4][6] = "BelandNFTPresale: only creator";
+      cases[3][6] = user;
+      cases[3][5] = "BelandNFTPresale: only creator";
 
       for (var i = 0; i < cases.length; i++) {
         await expectRevert(
-          this.presale.addPresale(...cases[i].slice(0, 6), {
-            from: cases[i][7],
+          this.presale.addPresale(...cases[i].slice(0, 5), {
+            from: cases[i][6],
           }),
-          cases[i][6]
+          cases[i][5]
         );
       }
 
