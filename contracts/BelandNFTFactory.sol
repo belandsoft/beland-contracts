@@ -32,7 +32,10 @@ contract BelandNFTFactory is Ownable {
         external
         returns (address nft)
     {
-        require(getCollection[_name][_symbol][_msgSender()] == address(0), 'BelandNFTFactory: COLLECTION_EXISTS'); // single check is sufficient
+        require(
+            getCollection[_name][_symbol][_msgSender()] == address(0),
+            "BelandNFTFactory: COLLECTION_EXISTS"
+        ); // single check is sufficient
         bytes memory bytecode = type(BelandNFT).creationCode;
         bytes32 salt = keccak256(
             abi.encodePacked(_name, _symbol, _msgSender())

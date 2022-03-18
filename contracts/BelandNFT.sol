@@ -69,14 +69,12 @@ contract BelandNFT is ERC721URIStorageUpgradeable, OwnableUpgradeable {
         _;
     }
 
-
-
-     // called once by the factory at time of deployment
+    // called once by the factory at time of deployment
     function initialize(
         string memory _name,
         string memory _symbol,
         address _creator
-    ) initializer public {
+    ) public initializer {
         __ERC721_init(_name, _symbol);
         __Ownable_init();
         creator = _creator;
