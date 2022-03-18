@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.3;
 pragma abicoder v2;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./libs/String.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
@@ -14,7 +14,7 @@ interface IFactory {
     function baseURI() external view returns (string memory);
 }
 
-contract BelandNFT is ERC721URIStorage, Ownable {
+contract BelandNFT is ERC721URIStorageUpgradeable, OwnableUpgradeable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     using String for address;
@@ -69,11 +69,16 @@ contract BelandNFT is ERC721URIStorage, Ownable {
         _;
     }
 
-    constructor(
+
+
+     // called once by the factory at time of deployment
+    function initialize(
         string memory _name,
         string memory _symbol,
         address _creator
-    ) ERC721(_name, _symbol) {
+    ) initializer public {
+        __ERC721_init(_name, _symbol);
+        __Ownable_init();
         creator = _creator;
         factory = _msgSender();
     }

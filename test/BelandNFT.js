@@ -19,6 +19,15 @@ contract("Beland NFT", ([owner, user]) => {
     assert.equal(await this.factory.collectionsLength(), 1);
   });
 
+  it("should not create collection", async () => {
+    this.factory = await BelandNFTFactory.new();
+    await this.factory.setBaseURI("beland.io/");
+    await this.factory.create("ABC", "ABC");
+    await expectRevert(this.factory.create("ABC", "ABC"), "COLLECTION_EXISTS")
+    await expectRevert(this.col.initialize("ABC", "ABC", this.factory.address), "transaction: revert Initializable: contract is already initialized")
+  });
+
+
   it("should transfer creatorship", async () => {
     await this.col.transferCreatorship(user);
     assert.equal(await this.col.creator(), user);
