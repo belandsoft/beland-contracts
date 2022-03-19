@@ -34,7 +34,14 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
 
     event PresaleCreated(address indexed nft, uint256 itemId, Presale);
     event PresaleCancel(address indexed nft, uint256 itemId);
-    event Buy(address indexed nft, uint256 itemId, uint256 qty);
+    event Buy(
+        address user,
+        address indexed nft,
+        uint256 itemId,
+        uint256 qty,
+        uint256 price,
+        uint256 netPrice
+    );
     event FeePercentUpdated(uint256 feePercent);
     event ReferalUpdated(address referral);
     event ReferralCommisionRateUpdated(uint256 newRate);
@@ -161,7 +168,7 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
         if (presale.isEditable) {
             presales[_nft][itemId].isEditable = false;
         }
-        emit Buy(_nft, itemId, _qty);
+        emit Buy(_msgSender(), _nft, itemId, _qty, price, netPrice);
     }
 
     function _recordReferral(address _referrer) private {

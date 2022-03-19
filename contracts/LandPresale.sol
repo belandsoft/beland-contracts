@@ -35,7 +35,7 @@ contract LandPresale is Context, ReentrancyGuard, Ownable {
     address referral;
     uint256 startDate;
 
-    event Buy(uint256[] landIds);
+    event Buy(address user, uint256[] landIds, uint256 price, uint256 netPrice);
 
     constructor(
         address _treasury,
@@ -84,7 +84,7 @@ contract LandPresale is Context, ReentrancyGuard, Ownable {
         netPrice = netPrice.sub(commission);
         IERC20(dealToken).safeTransferFrom(_msgSender(), treasury, netPrice);
         ILand(land).batchCreate(_msgSender(), landIds);
-        emit Buy(landIds);
+        emit Buy(_msgSender(), landIds, price, netPrice);
     }
 
     function _calculateDiscount(uint256 qty) internal pure returns (uint256) {
