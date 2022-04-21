@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract BelandNFTPresale is Ownable, ReentrancyGuard {
+contract BelandNFTSale is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
@@ -109,6 +109,11 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
         require(
             IBelandNFT(_nft).isApproved(),
             "BelandNFTPresale: not approved"
+        );
+
+        require(
+            IBelandNFT(_nft).itemsLength() > itemId,
+            "BelandNFTPresale: item not found"
         );
         
         if (presales[_nft][itemId].hasExist) {
