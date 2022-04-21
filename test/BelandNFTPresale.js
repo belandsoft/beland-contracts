@@ -91,10 +91,12 @@ contract(
       );
       
       await this.nft.setApproved(true);
+      await this.nft.addItems([[2, "hash"]]);
       await this.presale.addPresale(...correctData);
+      await this.presale.buy(this.nft.address, 0, 2, referrer, { from: user });
       await expectRevert(
         this.presale.addPresale(...correctData),
-        "BelandNFTPresale: presale found"
+        "BelandNFTPresale: not editable"
       );
     });
 

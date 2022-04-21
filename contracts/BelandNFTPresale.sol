@@ -110,10 +110,10 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
             IBelandNFT(_nft).isApproved(),
             "BelandNFTPresale: not approved"
         );
-        require(
-            !presales[_nft][itemId].hasExist,
-            "BelandNFTPresale: presale found"
-        );
+        
+        if (presales[_nft][itemId].hasExist) {
+            _cancelPresale(_nft, itemId);
+        }
 
         presales[_nft][itemId] = Presale({
             quoteToken: quoteToken,
@@ -132,6 +132,10 @@ contract BelandNFTPresale is Ownable, ReentrancyGuard {
             IBelandNFT(_nft).creator() == _msgSender(),
             "BelandNFTPresale: only creator"
         );
+       _cancelPresale(_nft, itemId);
+    }
+
+    function _cancelPresale(address _nft, uint256 itemId) private {
         require(
             presales[_nft][itemId].isEditable,
             "BelandNFTPresale: not editable"
