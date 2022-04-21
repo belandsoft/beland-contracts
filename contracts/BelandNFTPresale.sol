@@ -32,7 +32,7 @@ contract BelandNFTSale is Ownable, ReentrancyGuard {
     uint256 public maxFeePercent = 1000; // 10%;
     uint256 public referralCommisionRate = 100; // 1%
 
-    event PresaleCreated(address indexed nft, uint256 itemId, Presale);
+    event PresaleCreated(address indexed nft, uint256 itemId, Presale presale);
     event PresaleCancel(address indexed nft, uint256 itemId);
     event Buy(
         address user,
