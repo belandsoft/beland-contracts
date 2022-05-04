@@ -3,8 +3,8 @@
 pragma solidity ^0.8.0;
 pragma abicoder v2;
 
+import "./BelandNFT.sol";
 import "./interfaces/IBelandNFT.sol";
-import "./interfaces/IBelandNFTFactory.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IReferral.sol";
@@ -27,6 +27,7 @@ contract BelandNFTSale is Ownable, ReentrancyGuard {
     mapping(address => mapping(uint256 => Presale)) public presales;
     address public factory;
     address public treasury;
+    address public quoteToken;
     uint256 public feePercent = 100; // 1%
     address public referral;
     uint256 public maxFeePercent = 1000; // 10%;
@@ -46,25 +47,36 @@ contract BelandNFTSale is Ownable, ReentrancyGuard {
     event ReferalUpdated(address referral);
     event ReferralCommisionRateUpdated(uint256 newRate);
     event TreasuryUpdated(address treasury);
+    event SetQuoteToken(address token);
 
     constructor(
         address _factory,
         address _treasury,
+        address _quoteToken,
         address _referral
     ) {
         factory = _factory;
         treasury = _treasury;
         referral = _referral;
+        quoteToken = _quoteToken;
     }
 
     function setReferral(address _referral) external onlyOwner {
+        require(_referral != address(0), "zero addr");
         referral = _referral;
         emit ReferalUpdated(_referral);
     }
 
     function setTreasury(address _treasury) external onlyOwner {
+        require(_treasury != address(0), "zero addr");
         treasury = _treasury;
         emit TreasuryUpdated(_treasury);
+    }
+
+    function setQuoteToken(address _token) external onlyOwner {
+        require(_token != address(0), "zero addr");
+        quoteToken = _token;
+        emit SetQuoteToken(_token);
     }
 
     function setFeePercent(uint256 _percent) external onlyOwner {
@@ -80,76 +92,6 @@ contract BelandNFTSale is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice add presale
-     * @param _nft: address of nft
-     * @param itemId: item id
-     * @param pricePerUnit: price per unit
-     * @param _treasury: address of treasury
-     */
-    function addPresale(
-        address _nft,
-        uint256 itemId,
-        address quoteToken,
-        uint256 pricePerUnit,
-        address _treasury
-    ) external nonReentrant {
-        require(
-            pricePerUnit > 0,
-            "BelandNFTPresale: pricePerUnit must be greater zero"
-        );
-        require(_treasury != address(0), "BelandNFTPresale: zero treasury");
-        require(
-            IBelandNFTFactory(factory).isCollectionFromFactory(_nft),
-            "BelandNFTPresale: invalid nft"
-        );
-        require(
-            IBelandNFT(_nft).creator() == _msgSender(),
-            "BelandNFTPresale: only creator"
-        );
-        require(
-            IBelandNFT(_nft).isApproved(),
-            "BelandNFTPresale: not approved"
-        );
-
-        require(
-            IBelandNFT(_nft).itemsLength() > itemId,
-            "BelandNFTPresale: item not found"
-        );
-        
-        if (presales[_nft][itemId].hasExist) {
-            _cancelPresale(_nft, itemId);
-        }
-
-        presales[_nft][itemId] = Presale({
-            quoteToken: quoteToken,
-            pricePerUnit: pricePerUnit,
-            treasury: _treasury,
-            hasExist: true,
-            isEditable: true
-        });
-
-        emit PresaleCreated(_nft, itemId, presales[_nft][itemId]);
-    }
-
-    function cancelPresale(address _nft, uint256 itemId) external nonReentrant {
-        require(presales[_nft][itemId].hasExist, "BelandNFTPresale: not found");
-        require(
-            IBelandNFT(_nft).creator() == _msgSender(),
-            "BelandNFTPresale: only creator"
-        );
-       _cancelPresale(_nft, itemId);
-    }
-
-    function _cancelPresale(address _nft, uint256 itemId) private {
-        require(
-            presales[_nft][itemId].isEditable,
-            "BelandNFTPresale: not editable"
-        );
-        delete presales[_nft][itemId];
-        emit PresaleCancel(_nft, itemId);
-    }
-
-    /**
      * @notice buy nft
      * @param _nft: address of nft
      * @param _qty: quantity
@@ -160,23 +102,25 @@ contract BelandNFTSale is Ownable, ReentrancyGuard {
         uint256 _qty,
         address _referrer
     ) external nonReentrant {
-        Presale memory presale = presales[_nft][itemId];
-        require(presale.hasExist, "BelandNFTPresale: presale not found");
-        _recordReferral(_referrer);
-        IERC20 quote = IERC20(presale.quoteToken);
-        // pay commission fee + protocol fee;
-        uint256 price = presale.pricePerUnit.mul(_qty);
-        uint256 refFee = _payReferralCommission(_nft, itemId, price);
-        uint256 protocolFee = price.mul(feePercent).div(10000);
-        if (protocolFee > 0) {
-            quote.safeTransferFrom(_msgSender(), treasury, protocolFee);
+        IBelandNFT.Item memory item = IBelandNFT(_nft).items(itemId);
+
+        uint256 pricePerUnit = item.price;
+        uint256 price;
+        uint256 netPrice;
+        if (pricePerUnit > 0) {
+            _recordReferral(_referrer);
+            IERC20 quote = IERC20(quoteToken);
+            // pay commission fee + protocol fee;
+            price = pricePerUnit.mul(_qty);
+            uint256 refFee = _payReferralCommission(_nft, itemId, price);
+            uint256 protocolFee = price.mul(feePercent).div(10000);
+            if (protocolFee > 0) {
+                quote.safeTransferFrom(_msgSender(), treasury, protocolFee);
+            }
+            netPrice = price.sub(refFee).sub(protocolFee);
+            quote.safeTransferFrom(_msgSender(), item.treasury, netPrice);
         }
-        uint256 netPrice = price.sub(refFee).sub(protocolFee);
-        quote.safeTransferFrom(_msgSender(), presale.treasury, netPrice);
         IBelandNFT(_nft).batchCreate(_msgSender(), itemId, _qty);
-        if (presale.isEditable) {
-            presales[_nft][itemId].isEditable = false;
-        }
         emit Buy(_msgSender(), _nft, itemId, _qty, price, netPrice);
     }
 

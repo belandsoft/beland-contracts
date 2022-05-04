@@ -20,20 +20,24 @@ contract BelandNFT is ERC721URIStorageUpgradeable, OwnableUpgradeable {
     using String for address;
 
     bool public isApproved = false;
-    bool public isEditable = true;
     address public creator;
     mapping(address => bool) _minters;
     address public factory;
+    string public baseURI;
 
     struct ItemParams {
         uint256 maxSupply; // max supply
         string tokenURI;
+        uint256 price;
+        address treasury;
     }
 
     struct Item {
         uint256 maxSupply; // max supply
         uint256 totalSupply; // current supply
         string tokenURI;
+        uint256 price;
+        address treasury;
     }
 
     mapping(uint256 => uint256) private _itemOfToken;
@@ -73,12 +77,14 @@ contract BelandNFT is ERC721URIStorageUpgradeable, OwnableUpgradeable {
     function initialize(
         string memory _name,
         string memory _symbol,
-        address _creator
+        address _creator,
+        string memory _baseURI
     ) public initializer {
         __ERC721_init(_name, _symbol);
         __Ownable_init();
         creator = _creator;
         factory = _msgSender();
+        baseURI = _baseURI;
     }
 
     function setMinter(address _minter, bool _isMinter) external onlyCreator {
@@ -126,10 +132,14 @@ contract BelandNFT is ERC721URIStorageUpgradeable, OwnableUpgradeable {
         returns (string memory)
     {
         require(_exists(_tokenId), "tokenURI: INVALID_TOKEN_ID");
+        string memory base = baseURI;
+        if (bytes(base).length == 0) {
+            base = IFactory(factory).baseURI();
+        }
         return
             string(
                 abi.encodePacked(
-                    IFactory(factory).baseURI(),
+                    base,
                     "0x",
                     address(this).addressToString(),
                     "/",
@@ -138,45 +148,27 @@ contract BelandNFT is ERC721URIStorageUpgradeable, OwnableUpgradeable {
             );
     }
 
+    function setBaseURI(string memory _baseURI) external onlyOwner {
+        baseURI = _baseURI;
+    }
+
     /**
      * @notice Add new items
      * @param _items: list item params
      */
-    function addItems(ItemParams[] memory _items) external onlyCreator {
-        require(isEditable, "BelandNFT: not editable");
+    function addItems(ItemParams[] memory _items) external onlyOwner {
         for (uint256 i = 0; i < _items.length; i++) {
             items.push(
                 Item({
                     maxSupply: _items[i].maxSupply,
                     totalSupply: 0,
-                    tokenURI: _items[i].tokenURI
+                    price: _items[i].price,
+                    tokenURI: _items[i].tokenURI,
+                    treasury: _items[i].treasury
                 })
             );
         }
         emit ItemsAdd(_items);
-    }
-
-    /**
-     * @notice edit items
-     * @param _indexes: index of items
-     * @param  _items: list item params to edit
-     */
-    function editItems(uint256[] memory _indexes, ItemParams[] memory _items)
-        external
-        onlyCreator
-    {
-        require(isEditable, "BelandNFT: not editable");
-        for (uint256 i = 0; i < _indexes.length; i++) {
-            require(items.length > _indexes[i], "BelandNFT: item not found");
-            Item storage item = items[_indexes[i]];
-            require(
-                item.totalSupply <= _items[i].maxSupply,
-                "BelandNFT: max supply must be greater than total supply"
-            );
-            item.maxSupply = _items[i].maxSupply;
-            item.tokenURI = _items[i].tokenURI;
-        }
-        emit ItemsEdit(_indexes, _items);
     }
 
     /**
@@ -231,16 +223,6 @@ contract BelandNFT is ERC721URIStorageUpgradeable, OwnableUpgradeable {
     }
 
     /**
-     * @notice Set whether the collection can be editable or not.
-     * @param _value - Value to set
-     */
-    function setEditable(bool _value) external onlyOwner {
-        require(isEditable != _value, "BelandNFT: value is the same");
-        emit SetEditable(isEditable, _value);
-        isEditable = _value;
-    }
-
-    /**
      * @notice Get the amount of items
      */
     function itemsLength() external view returns (uint256) {
@@ -250,5 +232,10 @@ contract BelandNFT is ERC721URIStorageUpgradeable, OwnableUpgradeable {
     function itemOfToken(uint256 _tokenId) external view returns (Item memory) {
         require(_exists(_tokenId), "tokenURI: INVALID_TOKEN_ID");
         return items[_itemOfToken[_tokenId]];
+    }
+
+    function itemPrice(uint256 _itemId) external view returns (uint256) {
+        require(items[_itemId].maxSupply > 0, "item not found");
+        return items[_itemId].price;
     }
 }
