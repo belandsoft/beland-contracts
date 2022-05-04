@@ -28,18 +28,4 @@ contract Scene is ERC721URIStorage {
         _mint(user, newItemId);
         _setTokenURI(newItemId, tokenURI);
     }
-
-    /**
-     * @notice Create Scene
-     * @param sceneId: id of scene
-     * @param tokenURI: token URI
-     */
-    function deploy(uint256 sceneId, string memory tokenURI) external {
-        require(
-            _isApprovedOrOwner(_msgSender(), sceneId),
-            "ERC721: deploy caller is not owner nor approved"
-        );
-        _setTokenURI(sceneId, tokenURI);
-        emit DeployNew(sceneId, tokenURI);
-    }
 }
