@@ -1,6 +1,6 @@
 const { assert } = require("chai");
 
-const BelandNFTFactory = artifacts.require("./BelandNFTFactory.sol");
+const BelandNFTFactory = artifacts.require("BelandNFTFactory.sol");
 const BelandNFT = artifacts.require("./BelandNFT.sol");
 const expectRevert = require("@openzeppelin/test-helpers/src/expectRevert");
 const TestErc20 = artifacts.require("./TestErc20.sol");
