@@ -23,7 +23,7 @@ interface IReferral {
         external;
 }
 
-contract LandPresale is Context, ReentrancyGuard, Ownable {
+contract LandSale is Context, ReentrancyGuard, Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 

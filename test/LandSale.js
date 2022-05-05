@@ -1,15 +1,15 @@
 const { assert } = require("chai");
 
-const LandPresale = artifacts.require("./LandPresale.sol");
+const LandSale = artifacts.require("./LandSale.sol");
 const Land = artifacts.require("./Land.sol");
 const TestReferral = artifacts.require("./test/TestReferral.sol");
 const TestErc20 = artifacts.require("./TestErc20.sol");
-contract("LandPresale", ([owner, user, treasury, referrer]) => {
+contract("LandSale", ([owner, user, treasury, referrer]) => {
   beforeEach(async () => {
     this.land = await Land.new();
     this.referral = await TestReferral.new();
     this.usdt = await TestErc20.new();
-    this.presale = await LandPresale.new(treasury, this.land.address, this.usdt.address, 100, this.referral.address, 100, 0);
+    this.presale = await LandSale.new(treasury, this.land.address, this.usdt.address, 100, this.referral.address, 100, 0);
 
     await this.land.setMinter(this.presale.address, true);
     await this.usdt.mint(10000);

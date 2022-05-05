@@ -16,15 +16,6 @@ contract BelandNFTSale is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
-    struct Presale {
-        bool hasExist;
-        address quoteToken;
-        uint256 pricePerUnit;
-        address treasury;
-        bool isEditable;
-    }
-
-    mapping(address => mapping(uint256 => Presale)) public presales;
     address public factory;
     address public treasury;
     address public quoteToken;
@@ -33,8 +24,6 @@ contract BelandNFTSale is Ownable, ReentrancyGuard {
     uint256 public maxFeePercent = 1000; // 10%;
     uint256 public referralCommisionRate = 100; // 1%
 
-    event PresaleCreated(address indexed nft, uint256 itemId, Presale presale);
-    event PresaleCancel(address indexed nft, uint256 itemId);
     event Buy(
         address user,
         address indexed nft,
@@ -112,7 +101,7 @@ contract BelandNFTSale is Ownable, ReentrancyGuard {
             IERC20 quote = IERC20(quoteToken);
             // pay commission fee + protocol fee;
             price = pricePerUnit.mul(_qty);
-            uint256 refFee = _payReferralCommission(_nft, itemId, price);
+            uint256 refFee = _payReferralCommission(price);
             uint256 protocolFee = price.mul(feePercent).div(10000);
             if (protocolFee > 0) {
                 quote.safeTransferFrom(_msgSender(), treasury, protocolFee);
@@ -130,17 +119,15 @@ contract BelandNFTSale is Ownable, ReentrancyGuard {
         }
     }
 
-    function _payReferralCommission(
-        address _nft,
-        uint256 itemId,
-        uint256 amount
-    ) private returns (uint256 commission) {
+    function _payReferralCommission(uint256 amount)
+        private
+        returns (uint256 commission)
+    {
         if (referralCommisionRate > 0) {
-            Presale memory presale = presales[_nft][itemId];
             address referrer = IReferral(referral).getReferrer(_msgSender());
             if (referrer != address(0)) {
                 commission = amount.mul(referralCommisionRate).div(10000);
-                IERC20(presale.quoteToken).safeTransferFrom(
+                IERC20(quoteToken).safeTransferFrom(
                     _msgSender(),
                     referrer,
                     commission
