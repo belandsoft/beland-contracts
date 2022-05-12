@@ -64,9 +64,9 @@ contract LandDutchAuction is Context, ReentrancyGuard, Ownable {
     }
 
     function getPrice() public view returns (uint256) {
-        uint timeElapsed = block.timestamp - startTime;
-        uint discount = discountRate * timeElapsed;
-        return startPrice - discount;
+        uint timeElapsed = block.timestamp.sub(startTime);
+        uint discount = discountRate.mul(timeElapsed);
+        return startPrice.sub(discount);
     }
 
     function _recordReferral(address _referrer) private {
