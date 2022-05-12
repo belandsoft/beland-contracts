@@ -13,16 +13,15 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 contract BelandNFTSale is Ownable, ReentrancyGuard {
-    using SafeERC20 for IERC20;
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
-    address public factory;
     address public treasury;
-    address public quoteToken;
+    address public dealToken;
     uint256 public feePercent = 100; // 1%
     address public referral;
     uint256 public maxFeePercent = 1000; // 10%;
-    uint256 public referralCommisionRate = 100; // 1%
+    uint256 public referralCommisionRate = 50; // 1%
 
     event Buy(
         address user,
@@ -36,18 +35,16 @@ contract BelandNFTSale is Ownable, ReentrancyGuard {
     event ReferalUpdated(address referral);
     event ReferralCommisionRateUpdated(uint256 newRate);
     event TreasuryUpdated(address treasury);
-    event SetQuoteToken(address token);
+    event SetDealToken(address token);
 
     constructor(
-        address _factory,
         address _treasury,
-        address _quoteToken,
+        address _dealToken,
         address _referral
     ) {
-        factory = _factory;
         treasury = _treasury;
+        dealToken = _dealToken;
         referral = _referral;
-        quoteToken = _quoteToken;
     }
 
     function setReferral(address _referral) external onlyOwner {
@@ -62,10 +59,10 @@ contract BelandNFTSale is Ownable, ReentrancyGuard {
         emit TreasuryUpdated(_treasury);
     }
 
-    function setQuoteToken(address _token) external onlyOwner {
+    function setDealToken(address _token) external onlyOwner {
         require(_token != address(0), "zero addr");
-        quoteToken = _token;
-        emit SetQuoteToken(_token);
+        dealToken = _token;
+        emit SetDealToken(_token);
     }
 
     function setFeePercent(uint256 _percent) external onlyOwner {
@@ -87,18 +84,18 @@ contract BelandNFTSale is Ownable, ReentrancyGuard {
      */
     function buy(
         address _nft,
-        uint256 itemId,
+        uint256 _itemId,
         uint256 _qty,
         address _referrer
     ) external nonReentrant {
-        IBelandNFT.Item memory item = IBelandNFT(_nft).items(itemId);
+        IBelandNFT.Item memory item = IBelandNFT(_nft).getItem(_itemId);
 
         uint256 pricePerUnit = item.price;
         uint256 price;
         uint256 netPrice;
         if (pricePerUnit > 0) {
             _recordReferral(_referrer);
-            IERC20 quote = IERC20(quoteToken);
+            IERC20 quote = IERC20(dealToken);
             // pay commission fee + protocol fee;
             price = pricePerUnit.mul(_qty);
             uint256 refFee = _payReferralCommission(price);
@@ -109,8 +106,8 @@ contract BelandNFTSale is Ownable, ReentrancyGuard {
             netPrice = price.sub(refFee).sub(protocolFee);
             quote.safeTransferFrom(_msgSender(), item.treasury, netPrice);
         }
-        IBelandNFT(_nft).batchCreate(_msgSender(), itemId, _qty);
-        emit Buy(_msgSender(), _nft, itemId, _qty, price, netPrice);
+        IBelandNFT(_nft).batchCreate(_msgSender(), _itemId, _qty);
+        emit Buy(_msgSender(), _nft, _itemId, _qty, price, netPrice);
     }
 
     function _recordReferral(address _referrer) private {
@@ -120,14 +117,14 @@ contract BelandNFTSale is Ownable, ReentrancyGuard {
     }
 
     function _payReferralCommission(uint256 amount)
-        private
+        internal
         returns (uint256 commission)
     {
         if (referralCommisionRate > 0) {
             address referrer = IReferral(referral).getReferrer(_msgSender());
             if (referrer != address(0)) {
                 commission = amount.mul(referralCommisionRate).div(10000);
-                IERC20(quoteToken).safeTransferFrom(
+                IERC20(dealToken).safeTransferFrom(
                     _msgSender(),
                     referrer,
                     commission

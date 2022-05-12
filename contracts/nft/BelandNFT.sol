@@ -238,4 +238,9 @@ contract BelandNFT is ERC721URIStorageUpgradeable, OwnableUpgradeable {
         require(items[_itemId].maxSupply > 0, "item not found");
         return items[_itemId].price;
     }
+
+    function getItem(uint256 _itemId) external view returns (Item memory) {
+        require(items[_itemId].maxSupply > 0, "BelandNFT: item not found");
+        return items[_itemId];
+    }
 }

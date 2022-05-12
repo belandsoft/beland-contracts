@@ -18,7 +18,7 @@ interface IBelandNFT {
         uint256 price;
         address treasury;
     }
-
+    
     function creator() external view returns(address);
     function isApproved() external view returns(bool);
     function batchCreate(address user, uint256 itemId, uint256 qty) external;
@@ -31,5 +31,5 @@ interface IBelandNFT {
     ) external;
     function itemPrice(uint256 _itemId) external view returns (uint256);
     function addItems(ItemParams[] memory _items) external;
-    function items(uint256 itemId) external  view returns (Item memory);
+    function getItem(uint256 _itemId) external view returns (Item memory);
 }

@@ -27,7 +27,6 @@ contract LandDutchAuction is Context, ReentrancyGuard, Ownable {
 
     event Buy(address user, uint256[] landIds, uint256 price, uint256 netPrice);
 
-
     constructor(
         address _nft,
         uint256 _startPrice,
@@ -37,11 +36,14 @@ contract LandDutchAuction is Context, ReentrancyGuard, Ownable {
         address _referral,
         uint256 _discountRate
     ) {
-        require(_startPrice >= _discountRate * DURATION, "Starting price is too low");
+        require(
+            _startPrice >= _discountRate * DURATION,
+            "Starting price is too low"
+        );
         nft = _nft;
         startPrice = _startPrice;
         startTime = _startTime;
-        endTime = startPrice  + DURATION;
+        endTime = startTime + DURATION;
         treasury = _treasury;
         dealToken = _dealToken;
         referral = _referral;
@@ -53,6 +55,10 @@ contract LandDutchAuction is Context, ReentrancyGuard, Ownable {
         uint256[] memory landIds,
         address _referrer
     ) external {
+        require(startTime <= block.timestamp, "LandDutchAuction: not started");
+        require(endTime >= block.timestamp, "LandDutchAuction: ended");
+        require(landIds.length > 0, "LandDutchAuction: zero landIds");
+
         uint256 pricePerUnit = getPrice();
         uint256 price = landIds.length.mul(pricePerUnit);
         _recordReferral(_referrer);
@@ -64,8 +70,8 @@ contract LandDutchAuction is Context, ReentrancyGuard, Ownable {
     }
 
     function getPrice() public view returns (uint256) {
-        uint timeElapsed = block.timestamp.sub(startTime);
-        uint discount = discountRate.mul(timeElapsed);
+        uint256 timeElapsed = block.timestamp.sub(startTime);
+        uint256 discount = discountRate.mul(timeElapsed);
         return startPrice.sub(discount);
     }
 
