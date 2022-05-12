@@ -28,11 +28,13 @@ contract BeanCrowdsale is Ownable, ReentrancyGuard {
         address _bean,
         uint256 _rate,
         uint256 _startTime,
-        uint256 _endTime
+        uint256 _endTime,
+        uint256 _startPrice
     ) {
         bean = _bean;
         rate = _rate;
-        startPrice = _startTime;
+        startPrice = _startPrice;
+        startTime = _startTime;
         endTime = _endTime;
     }
 
