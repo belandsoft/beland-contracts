@@ -9,19 +9,8 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-
-interface ILand {
-    function batchCreate(address user, uint256[] memory landIds) external;
-}
-
-interface IReferral {
-    function recordReferral(address _user, address _referrer) external;
-
-    function getReferrer(address _user) external view returns (address);
-
-    function recordReferralCommission(address _referrer, uint256 _commission)
-        external;
-}
+import "../interfaces/IReferral.sol";
+import "../interfaces/ILand.sol";
 
 contract LandSale is Context, ReentrancyGuard, Ownable {
     using SafeMath for uint256;
