@@ -24,9 +24,16 @@ contract BeanCrowdsale is Ownable, ReentrancyGuard {
 
     event Buy(address user, uint256 amount, uint256 price);
 
-    constructor(address _bean, uint256 _rate) {
+    constructor(
+        address _bean,
+        uint256 _rate,
+        uint256 _startTime,
+        uint256 _endTime
+    ) {
         bean = _bean;
         rate = _rate;
+        startPrice = _startTime;
+        endTime = _endTime;
     }
 
     function getPrice() public view returns (uint256) {
@@ -42,7 +49,6 @@ contract BeanCrowdsale is Ownable, ReentrancyGuard {
 
         uint256 pricePerUnit = getPrice();
         uint256 price = pricePerUnit.mul(amount);
-        TransferHelper.safeTransferETH(owner(), price);
         IERC20(bean).safeTransfer(_msgSender(), amount);
         if (msg.value > price) {
             TransferHelper.safeTransferETH(_msgSender(), msg.value.sub(price));
