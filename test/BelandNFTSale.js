@@ -1,4 +1,4 @@
-const { assert, use } = require("chai");
+const { assert } = require("chai");
 
 const BelandNFTFactory = artifacts.require("./BelandNFTFactory.sol");
 const BelandNFT = artifacts.require("./BelandNFT.sol");
