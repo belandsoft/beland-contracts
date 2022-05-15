@@ -10,7 +10,7 @@ contract BeanERC20 is ERC20, Ownable {
 
     constructor() ERC20("BEAN Token", "BEAN") {}
 
-    function setMinter(address minter, bool isMinter) external {
+    function setMinter(address minter, bool isMinter) external onlyOwner {
         require(_minters[minter] != isMinter, "BeanERC20: same value");
         _minters[minter] = isMinter;
         emit SetMinter(minter, isMinter);

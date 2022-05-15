@@ -55,11 +55,20 @@ contract BeanCrowdsale is Ownable, ReentrancyGuard {
         return whitelist[buyer];
     }
 
+    /**
+     * @notice Set Buyer Rate
+     * @param _buyer: address of the buyer
+     * @param _rate: rate of the buyer
+     */
     function setBuyerRate(address _buyer, uint256 _rate) external onlyOwner {
         require(_buyer != address(0x0), "BeanCrowdsale: zero buyer address");
         buyerRate[_buyer] = _rate;
     }
 
+    /**
+     * @notice Get Price
+     * @param buyer: address of the buyer
+     */
     function getPrice(address buyer) public view returns (uint256) {
         if (buyerRate[buyer] > 0) {
             return buyerRate[buyer];
