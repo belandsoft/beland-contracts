@@ -86,7 +86,7 @@ contract BeanCrowdsale is Ownable, ReentrancyGuard {
     /*
      * @dev Buy token
      */
-    function buy(address beneficiary) external payable nonReentrant {
+    function buy(address beneficiary) public payable nonReentrant {
         require(startTime <= block.timestamp, "BeanCrowdsale: not started");
         require(endTime >= block.timestamp, "BeanCrowdsale: ended");
         require(msg.value > 0, "BeanCrowdsale: zero value");
@@ -109,5 +109,9 @@ contract BeanCrowdsale is Ownable, ReentrancyGuard {
 
     function withdrawETH() external onlyOwner {
         TransferHelper.safeTransferETH(owner(), address(this).balance);
+    }
+
+    receive() external payable {
+        buy(msg.sender);
     }
 }

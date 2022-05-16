@@ -1,6 +1,7 @@
 const { assert } = require("chai");
 const { getLastBlockTimestamp } = require("./utils");
 const expectRevert = require("@openzeppelin/test-helpers/src/expectRevert");
+const { web3 } = require("@openzeppelin/test-helpers/src/setup");
 
 const BeanCrowdsale = artifacts.require("./BeanCrowdsale.sol");
 const TestReferral = artifacts.require("./test/TestReferral.sol");
@@ -26,6 +27,16 @@ contract("BeanCrowdsale", ([owner, user]) => {
 
   it("Buy", async () => {
     await this.sale.buy(user, { from: user, value: 2000 });
+    const price = await this.sale.getPrice(user);
+    assert.equal(await this.bean.balanceOf(user), Math.floor(2000/price));
+  });
+
+  it("Buy: receive ETH", async () => {
+    await web3.eth.sendTransaction({
+      from: user,
+      to: this.sale.address,
+      value: 2000
+    });
     const price = await this.sale.getPrice(user);
     assert.equal(await this.bean.balanceOf(user), Math.floor(2000/price));
   });
