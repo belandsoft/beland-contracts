@@ -1,5 +1,5 @@
 const { assert } = require("chai");
-const { getLastBlockTimestamp } = require("./utils");
+const { getLastBlockTimestamp, mineBlockWithTS } = require("./utils");
 const expectRevert = require("@openzeppelin/test-helpers/src/expectRevert");
 const { web3 } = require("@openzeppelin/test-helpers/src/setup");
 
@@ -14,9 +14,9 @@ contract("BeanCrowdsale", ([owner, user]) => {
     const time = await getLastBlockTimestamp();
     this.sale = await BeanCrowdsale.new(
       this.bean.address,
-      10, // rate
-      1, // discount rate
-      100, // start price
+      10000, // rate
+      5000, // discount rate
+      1000, // start price
       10000, // cap
       time, // start time
       time + 10000, // end time
@@ -27,8 +27,8 @@ contract("BeanCrowdsale", ([owner, user]) => {
 
   it("Buy", async () => {
     await this.sale.buy(user, { from: user, value: 2000 });
-    const price = await this.sale.getPrice(user);
-    assert.equal(await this.bean.balanceOf(user), Math.floor(2000/price));
+    const rate = await this.sale.getRate(user);
+    assert.equal((await this.bean.balanceOf(user)).toString(), Math.floor(2000 * rate / 100));
   });
 
   it("Buy: receive ETH", async () => {
@@ -37,25 +37,31 @@ contract("BeanCrowdsale", ([owner, user]) => {
       to: this.sale.address,
       value: 2000
     });
-    const price = await this.sale.getPrice(user);
-    assert.equal(await this.bean.balanceOf(user), Math.floor(2000/price));
+    const rate = await this.sale.getRate(user);
+    assert.equal(await this.bean.balanceOf(user), Math.floor(2000 * rate / 100));
   });
 
   it("Add Whitelist", async () => {
     await this.sale.addToWhitelist(user);
-    const price = await this.sale.getPrice(user);
-    assert.equal(price, 1);
+    const rate = await this.sale.getRate(user);
+    assert.equal(rate, 1000);
   })
 
   it("Set Buyer Rate", async () => {
     await this.sale.setBuyerRate(user, 10);
-    const price = await this.sale.getPrice(user);
-    assert.equal(price, 10);
+    const rate = await this.sale.getRate(user);
+    assert.equal(rate, 10);
   })
 
   it("Should Not Buy", async () => {
     await expectRevert(this.sale.buy(user, { from: user, value: 10001 }), "BeanCrowdsale: max cap");
   });
 
+  it("change rate", async() => {
+    const currentTime = await getLastBlockTimestamp()
+    await mineBlockWithTS(currentTime + 5000);
+    const rate = await this.sale.getRate(user);
+    assert.equal(rate.toString(), 7499);
+  })
 
 });

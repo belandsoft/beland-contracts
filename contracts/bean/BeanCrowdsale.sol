@@ -14,10 +14,10 @@ contract BeanCrowdsale is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
 
     address public bean;
-    uint256 public rate;
+    uint256 public initialRate;
+    uint256 public endRate;
     uint256 public startTime;
     uint256 public endTime;
-    uint256 public startPrice;
     uint256 public raised;
     uint256 public cap;
     uint256 public discountRate;
@@ -29,20 +29,20 @@ contract BeanCrowdsale is Ownable, ReentrancyGuard {
 
     constructor(
         address _bean,
-        uint256 _rate,
+        uint256 _initialRate,
+        uint256 _endRate,
         uint256 _discountRate,
-        uint256 _startPrice,
         uint256 _cap,
         uint256 _startTime,
         uint256 _endTime
     ) {
         bean = _bean;
-        rate = _rate;
-        startPrice = _startPrice;
+        initialRate = _initialRate;
+        endRate = _endRate;
+        discountRate = _discountRate;
+        cap = _cap;
         startTime = _startTime;
         endTime = _endTime;
-        cap = _cap;
-        discountRate = _discountRate;
     }
 
     function addToWhitelist(address buyer) external onlyOwner {
@@ -66,10 +66,10 @@ contract BeanCrowdsale is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice Get Price
+     * @notice Get Rate
      * @param buyer: address of the buyer
      */
-    function getPrice(address buyer) public view returns (uint256) {
+    function getRate(address buyer) public view returns (uint256) {
         if (buyerRate[buyer] > 0) {
             return buyerRate[buyer];
         }
@@ -79,8 +79,8 @@ contract BeanCrowdsale is Ownable, ReentrancyGuard {
         }
 
         uint256 timeElapsed = block.timestamp.sub(startTime);
-        uint256 changePrice = rate.mul(timeElapsed);
-        return startPrice.add(changePrice);
+        uint256 timeRange = endTime.sub(startTime);
+        return initialRate.sub(endRate.mul(timeElapsed).div(timeRange));
     }
 
     /*
@@ -92,12 +92,11 @@ contract BeanCrowdsale is Ownable, ReentrancyGuard {
         require(msg.value > 0, "BeanCrowdsale: zero value");
         require(raised.add(msg.value) <= cap, "BeanCrowdsale: max cap");
 
-        uint256 pricePerUnit = getPrice(_msgSender());
-        uint256 tokens = msg.value.div(pricePerUnit);
-
+        uint256 rate = getRate(_msgSender());
+        uint256 tokens = msg.value.mul(rate).div(100);
         IBean(bean).mint(beneficiary, tokens);
         raised = raised.add(msg.value);
-        emit Buy(beneficiary, tokens, pricePerUnit);
+        emit Buy(beneficiary, tokens, rate);
     }
 
     function withdraw(address _token) external onlyOwner {
