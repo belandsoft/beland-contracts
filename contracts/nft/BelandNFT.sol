@@ -45,7 +45,7 @@ contract BelandNFT is ERC721URIStorageUpgradeable, OwnableUpgradeable {
 
     // Events
     event ItemsAdd(ItemParams[] _items);
-    event ItemsEdit(uint256[] indexes, ItemParams[] _items);
+    event ItemsEdit(uint256[] itemIds, ItemParams[] _items);
     event MinterUpdate(address _minter, bool _isMinter);
     event Created(address user, uint256 tokenId, uint256 itemId);
     event SetApproved(bool _previousValue, bool _newValue);
@@ -56,19 +56,19 @@ contract BelandNFT is ERC721URIStorageUpgradeable, OwnableUpgradeable {
     );
 
     modifier onlyMinter() {
-        require(_minters[_msgSender()], "BelandNFT: only minter");
+        require(_minters[_msgSender()], "BelandNFT: caller is not minter");
         _;
     }
 
     modifier onlyCreator() {
-        require(creator == _msgSender(), "BelandNFT: only creator");
+        require(creator == _msgSender(), "BelandNFT: caller is not creator");
         _;
     }
 
     modifier onlyCreatorOrOwner() {
         require(
             creator == _msgSender() || owner() == _msgSender(),
-            "BelandNFT: only creator or owner"
+            "BelandNFT: caller is not creator or owner"
         );
         _;
     }
@@ -156,7 +156,8 @@ contract BelandNFT is ERC721URIStorageUpgradeable, OwnableUpgradeable {
      * @notice Add new items
      * @param _items: list item params
      */
-    function addItems(ItemParams[] memory _items) external onlyOwner {
+    function addItems(ItemParams[] memory _items) external onlyCreatorOrOwner {
+        require(!isApproved, "BelandNFT: not editable");
         for (uint256 i = 0; i < _items.length; i++) {
             items.push(
                 Item({
@@ -169,6 +170,26 @@ contract BelandNFT is ERC721URIStorageUpgradeable, OwnableUpgradeable {
             );
         }
         emit ItemsAdd(_items);
+    }
+
+    function editItems(uint256[] memory _itemIds, ItemParams[] memory _items)
+        external
+        onlyCreatorOrOwner
+    {
+        require(!isApproved, "BelandNFT: not editable");
+        for (uint256 i = 0; i < _itemIds.length; i++) {
+            require(items.length > _itemIds[i], "BelandNFT: item not found");
+            Item storage item = items[_itemIds[i]];
+            require(
+                item.totalSupply <= _items[i].maxSupply,
+                "BelandNFT: max supply must be greater than total supply"
+            );
+            item.maxSupply = _items[i].maxSupply;
+            item.tokenURI = _items[i].tokenURI;
+            item.price = _items[i].price;
+            item.treasury = _items[i].treasury;
+        }
+        emit ItemsEdit(_itemIds, _items);
     }
 
     /**

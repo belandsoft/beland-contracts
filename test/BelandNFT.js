@@ -44,7 +44,7 @@ contract("Beland NFT", ([owner, user, treasury, saleTreasury]) => {
   it("should not transfer creatorship", async () => {
     await expectRevert(
       this.col.transferCreatorship(user, { from: user }),
-      "BelandNFT: only creator or owner"
+      "BelandNFT: caller is not creator or owner"
     );
     await expectRevert(
       this.col.transferCreatorship(
@@ -66,9 +66,33 @@ contract("Beland NFT", ([owner, user, treasury, saleTreasury]) => {
   it("should not add item", async () => {
     await expectRevert(
       this.col.addItems([[2, "hash", 100, saleTreasury]], { from: user }),
-      "Ownable: caller is not the owner"
+      "BelandNFT: caller is not creator or owner"
     );
   });
+  
+  it("should not edit items", async () => {
+    await expectRevert(
+      this.col.editItems([0], [[2, "hash", 100, saleTreasury]], { from: user }),
+      "BelandNFT: caller is not creator or owner"
+    );
+
+    await this.col.setApproved(true)
+    await expectRevert(
+      this.col.editItems([0], [[2, "hash", 100, saleTreasury]]),
+      "BelandNFT: not editable"
+    );
+  })
+
+  it("should edit items", async () => {
+    await this.col.editItems([0], [[5, "hash1", 200, user]])
+    const item = await this.col.items(0);
+    assert.equal(item[0], 5);
+    assert.equal(item[1], 0);
+    assert.equal(item[2], "hash1");
+    assert.equal(item[3], 200);
+    assert.equal(item[4], user);
+  })
+
 
   it("should create nft", async () => {
     await this.col.addItems([[2, "hash", 100, saleTreasury]]);
@@ -100,11 +124,11 @@ contract("Beland NFT", ([owner, user, treasury, saleTreasury]) => {
     await expectRevert(this.col.create(user, 2), "BelandNFT: item not found");
     await expectRevert(
       this.col.create(user, 2, { from: user }),
-      "BelandNFT: only minter"
+      "BelandNFT: caller is not minter"
     );
     await expectRevert(
       this.col.batchCreate(user, 1, 1, { from: user }),
-      "BelandNFT: only minter"
+      "BelandNFT: caller is not minter"
     );
     await this.col.batchCreate(user, 1, 2);
     await expectRevert(this.col.create(user, 1), "BelandNFT: max supply");
