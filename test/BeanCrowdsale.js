@@ -61,7 +61,7 @@ contract("BeanCrowdsale", ([owner, user]) => {
     const currentTime = await getLastBlockTimestamp()
     await mineBlockWithTS(currentTime + 5000);
     const rate = await this.sale.getRate(user);
-    assert.equal(rate.toString(), 7499);
+    assert.equal(Number(rate.toString()) <  7500, true);
   })
 
 });
