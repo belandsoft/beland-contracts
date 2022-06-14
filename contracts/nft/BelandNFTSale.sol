@@ -111,7 +111,7 @@ contract BelandNFTSale is Ownable, ReentrancyGuard {
     }
 
     function _recordReferral(address _referrer) private {
-        if (_referrer != address(0) && _referrer != _msgSender()) {
+        if (_referrer != address(0) && _referrer != _msgSender() && referral != address(0)) {
             IReferral(referral).recordReferral(_msgSender(), _referrer);
         }
     }
@@ -120,7 +120,7 @@ contract BelandNFTSale is Ownable, ReentrancyGuard {
         internal
         returns (uint256 commission)
     {
-        if (referralCommisionRate > 0) {
+        if (referralCommisionRate > 0  && referral != address(0)) {
             address referrer = IReferral(referral).getReferrer(_msgSender());
             if (referrer != address(0)) {
                 commission = amount.mul(referralCommisionRate).div(10000);
