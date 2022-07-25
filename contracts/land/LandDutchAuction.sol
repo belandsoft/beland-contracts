@@ -22,32 +22,35 @@ contract LandDutchAuction is Context, ReentrancyGuard, Ownable {
     uint256 public referralCommision = 50; // 0.5%;
     address public referral;
     address public nft;
-    uint256 startPrice;
-    uint256 discountRate;
+
+    struct Discount {
+        uint256 duration;
+        uint256 price;
+    }
+
+    Discount[] public discounts;
 
     event Buy(address user, uint256[] landIds, uint256 price, uint256 netPrice);
 
     constructor(
         address _nft,
-        uint256 _startPrice,
         uint256 _startTime,
         address _treasury,
         address _dealToken,
         address _referral,
-        uint256 _discountRate
+        Discount[] memory _discounts
     ) {
-        require(
-            _startPrice >= _discountRate * DURATION,
-            "Starting price is too low"
-        );
         nft = _nft;
-        startPrice = _startPrice;
         startTime = _startTime;
         endTime = startTime + DURATION;
         treasury = _treasury;
         dealToken = _dealToken;
         referral = _referral;
-        discountRate = _discountRate;
+
+        for (uint256 i = 0; i < _discounts.length; i ++) {
+            discounts.push(_discounts[i]);
+        }
+
     }
 
     function buy(
@@ -71,8 +74,13 @@ contract LandDutchAuction is Context, ReentrancyGuard, Ownable {
 
     function getPrice() public view returns (uint256) {
         uint256 timeElapsed = block.timestamp.sub(startTime);
-        uint256 discount = discountRate.mul(timeElapsed);
-        return startPrice.sub(discount);
+
+        for (uint256 i = 0; i < discounts.length; i++) {
+            if (timeElapsed < discounts[i].duration) {
+                return discounts[i].price;
+            }
+        }
+        revert("Invalid time");
     }
 
     function _recordReferral(address _referrer) private {

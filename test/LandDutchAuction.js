@@ -13,12 +13,11 @@ contract("LandDutchAuction", ([owner, user, treasury, referrer]) => {
     this.usdt = await TestErc20.new();
     this.auction = await LandDutchAuction.new(
       this.land.address,
-      10000000,
       Math.floor(new Date().getTime() / 1000),
       treasury,
       this.usdt.address,
       this.referral.address,
-      16
+      [[500, 10]]
     );
 
     await this.land.setMinter(this.auction.address, true);
@@ -35,12 +34,11 @@ contract("LandDutchAuction", ([owner, user, treasury, referrer]) => {
   it("Should not buy", async () => {
     this.auction = await LandDutchAuction.new(
       this.land.address,
-      10000000,
       Math.floor(new Date().getTime() / 1000) + 1000000,
       treasury,
       this.usdt.address,
       this.referral.address,
-      16
+      [[500, 10]]
     );
     await expectRevert(this.auction.buy(user, [1], referrer), "LandDutchAuction: not started")
   })
