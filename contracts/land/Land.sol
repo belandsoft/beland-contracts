@@ -30,7 +30,7 @@ contract Land is ERC721, Ownable {
         require(
             operator[tokenId] == _msgSender() ||
                 _isApprovedOrOwner(_msgSender(), tokenId),
-                "Land: only operator or owner"
+            "Land: only operator or owner"
         );
         _;
     }
@@ -92,13 +92,21 @@ contract Land is ERC721, Ownable {
     }
 
     function setOperator(uint256 tokenId, address _operator)
-        external
+        public
         onlyOperatorOrTokenOwner(tokenId)
     {
         require(_operator != address(0x0), "zero address");
         require(operator[tokenId] != _operator, "not change");
         operator[tokenId] == _operator;
         emit SetOperator(tokenId, _operator);
+    }
+
+    function setManyOperator(uint256[] calldata tokenIds, address _operator)
+        external
+    {
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            setOperator(tokenIds[i], _operator);
+        }
     }
 
     function setBaseURI(string calldata __baseURI) external onlyOwner {
