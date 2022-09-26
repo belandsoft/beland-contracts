@@ -47,6 +47,14 @@ contract Land is ERC721, Ownable {
         return _isOperator(_operator, tokenId);
     }
 
+    function isOperatorUpdates(address owner, address _operator)
+        external
+        view
+        returns (bool)
+    {
+        return _operatorUpdates[owner][_operator];
+    }
+
     function _isOperator(address _operator, uint256 tokenId)
         internal
         view
@@ -119,10 +127,9 @@ contract Land is ERC721, Ownable {
     {
         require(_operator != address(0x0), "zero address");
         require(_tokenOperator[tokenId] != _operator, "not change");
-        _tokenOperator[tokenId] == _operator;
+        _tokenOperator[tokenId] = _operator;
         emit SetOperator(tokenId, _operator);
     }
-
 
     function setOperatorUpdates(address _operator, bool approved) external {
         require(_operator != address(0x0), "zero address");

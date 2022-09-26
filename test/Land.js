@@ -1,8 +1,8 @@
-const { assert } = require("chai");
+const { assert, use } = require("chai");
 const expectRevert = require("@openzeppelin/test-helpers/src/expectRevert");
 
 const Land = artifacts.require("./Land.sol");
-contract("Land", ([owner, user]) => {
+contract("Land", ([owner, user, user2]) => {
   beforeEach(async () => {
     this.land = await Land.new();
     await this.land.setBaseURI("beland.io/");
@@ -50,7 +50,7 @@ contract("Land", ([owner, user]) => {
     await this.land.setMetadata(10, "3434");
     await expectRevert(
       this.land.setMetadata(10, "!212", { from: user }),
-      "Land: transfer caller is not owner nor approved"
+      "Land: only operator or owner"
     );
     assert.equal(await this.land.metadata(10), "3434");
   });
@@ -63,4 +63,22 @@ contract("Land", ([owner, user]) => {
     await this.land.setMinter(owner, 0);
     await expectRevert(this.land.create(owner, 10), "Land: only minter");
   });
+
+  it("Operator", async() => {
+    await this.land.create(owner, 10)
+    await this.land.setOperator(10, user);
+    assert.equal(await this.land.isOperator(user, 10), true)
+
+    await this.land.setOperatorUpdates(user,true);
+    assert.equal(await this.land.isOperatorUpdates(owner, user), true)
+
+
+    await this.land.transferFrom(owner,user2, 10)
+    assert.equal(await this.land.isOperator(user, 10), false)
+
+    await expectRevert(
+      this.land.setMetadata(10, "!212", { from: user }),
+      "Land: only operator or owner"
+    );
+  })
 });
