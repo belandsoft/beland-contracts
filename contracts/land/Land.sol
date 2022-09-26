@@ -13,11 +13,13 @@ contract Land is ERC721, Ownable {
     uint256 public HEIGHT = 300;
     string public baseURI;
     mapping(address => bool) _minters;
-    mapping(uint256 => address) public operator;
+    mapping(uint256 => address) _tokenOperator;
+    mapping(address => mapping(address => bool)) _operatorUpdates;
 
     event MinterUpdate(address _minter, bool _isMinter);
     event MetadataUpdate(uint256 landId, string data);
     event SetOperator(uint256 tokenId, address operator);
+    event SetOperatorUpdates(address owner, address operator, bool approved);
 
     mapping(uint256 => string) public metadata;
 
@@ -28,7 +30,7 @@ contract Land is ERC721, Ownable {
 
     modifier onlyOperatorOrTokenOwner(uint256 tokenId) {
         require(
-            operator[tokenId] == _msgSender() ||
+            _isOperator(_msgSender(), tokenId) ||
                 _isApprovedOrOwner(_msgSender(), tokenId),
             "Land: only operator or owner"
         );
@@ -36,6 +38,26 @@ contract Land is ERC721, Ownable {
     }
 
     constructor() ERC721("BeLand", "BLAND") {}
+
+    function isOperator(address _operator, uint256 tokenId)
+        external
+        view
+        returns (bool)
+    {
+        return _isOperator(_operator, tokenId);
+    }
+
+    function _isOperator(address _operator, uint256 tokenId)
+        internal
+        view
+        returns (bool)
+    {
+        address owner = ownerOf(tokenId);
+        return
+            owner == _operator ||
+            _tokenOperator[tokenId] == _operator ||
+            _operatorUpdates[owner][_operator];
+    }
 
     /**
      * @notice Create new Land
@@ -96,9 +118,17 @@ contract Land is ERC721, Ownable {
         onlyOperatorOrTokenOwner(tokenId)
     {
         require(_operator != address(0x0), "zero address");
-        require(operator[tokenId] != _operator, "not change");
-        operator[tokenId] == _operator;
+        require(_tokenOperator[tokenId] != _operator, "not change");
+        _tokenOperator[tokenId] == _operator;
         emit SetOperator(tokenId, _operator);
+    }
+
+
+    function setOperatorUpdates(address _operator, bool approved) external {
+        require(_operator != address(0x0), "zero address");
+        require(_operator != _msgSender(), "same sender");
+        _operatorUpdates[_msgSender()][_operator] = approved;
+        emit SetOperatorUpdates(_msgSender(), _operator, approved);
     }
 
     function setManyOperator(uint256[] calldata tokenIds, address _operator)
@@ -128,5 +158,15 @@ contract Land is ERC721, Ownable {
     {
         require(_exists(_tokenId), "tokenURI: INVALID_TOKEN_ID");
         return string(abi.encodePacked(baseURI, Strings.toString(_tokenId)));
+    }
+
+    function _afterTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual override {
+        super._afterTokenTransfer(from, to, tokenId);
+        _tokenOperator[tokenId] = address(0x0);
+        emit SetOperator(tokenId, address(0x0));
     }
 }
