@@ -13,13 +13,25 @@ contract Land is ERC721, Ownable {
     uint256 public HEIGHT = 300;
     string public baseURI;
     mapping(address => bool) _minters;
+    mapping(uint256 => address) public operator;
+
     event MinterUpdate(address _minter, bool _isMinter);
     event MetadataUpdate(uint256 landId, string data);
+    event SetOperator(uint256 tokenId, address operator);
 
     mapping(uint256 => string) public metadata;
 
     modifier onlyMinter() {
         require(_minters[_msgSender()], "Land: only minter");
+        _;
+    }
+
+    modifier onlyOperatorOrTokenOwner(uint256 tokenId) {
+        require(
+            operator[tokenId] == _msgSender() ||
+                _isApprovedOrOwner(_msgSender(), tokenId),
+                "Land: only operator or owner"
+        );
         _;
     }
 
@@ -71,13 +83,22 @@ contract Land is ERC721, Ownable {
      * @param landId: id of land
      * @param data: data
      */
-    function setMetadata(uint256 landId, string memory data) external {
-        require(
-            _isApprovedOrOwner(_msgSender(), landId),
-            "Land: transfer caller is not owner nor approved"
-        );
+    function setMetadata(uint256 landId, string memory data)
+        external
+        onlyOperatorOrTokenOwner(landId)
+    {
         metadata[landId] = data;
         emit MetadataUpdate(landId, data);
+    }
+
+    function setOperator(uint256 tokenId, address _operator)
+        external
+        onlyOperatorOrTokenOwner(tokenId)
+    {
+        require(_operator != address(0x0), "zero address");
+        require(operator[tokenId] != _operator, "not change");
+        operator[tokenId] == _operator;
+        emit SetOperator(tokenId, _operator);
     }
 
     function setBaseURI(string calldata __baseURI) external onlyOwner {
