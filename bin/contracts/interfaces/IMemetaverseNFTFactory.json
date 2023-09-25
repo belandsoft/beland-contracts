@@ -1,0 +1,176 @@
+{
+    "contractName": "IMemetaverseNFTFactory",
+    "abi": [
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "nft",
+                    "type": "address"
+                }
+            ],
+            "name": "isCollectionFromFactory",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }
+    ],
+    "metadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nft\",\"type\":\"address\"}],\"name\":\"isCollectionFromFactory\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/data/Projects/mtv/memetaverse-contracts/contracts/interfaces/IMemetaverseNFTFactory.sol\":\"IMemetaverseNFTFactory\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/data/Projects/mtv/memetaverse-contracts/contracts/interfaces/IMemetaverseNFTFactory.sol\":{\"keccak256\":\"0x016d4cccc4b1f77c7253cb440f847f817722dbd2381c4ec5851e7cbe1c817567\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://39a0b89dbca92690303cdbed02f8671f7eaed64450f7013b0cf87b65fc8ac61f\",\"dweb:/ipfs/QmT6yCmMDvv7qwBVSJkRLHyVNHyRAHaXJkAcH7MnKfRQqT\"]}},\"version\":1}",
+    "bytecode": "",
+    "deployedBytecode": "",
+    "sourceMap": "",
+    "deployedSourceMap": "",
+    "sourcePath": "/data/Projects/mtv/memetaverse-contracts/contracts/interfaces/IMemetaverseNFTFactory.sol",
+    "compiler": {
+        "name": "solc",
+        "version": "0.8.19+commit.7dd6d404"
+    },
+    "ast": {
+        "absolutePath": "/data/Projects/mtv/memetaverse-contracts/contracts/interfaces/IMemetaverseNFTFactory.sol",
+        "exportedSymbols": {
+            "IMemetaverseNFTFactory": [
+                626
+            ]
+        },
+        "id": 627,
+        "license": "UNLICENSED",
+        "nodeType": "SourceUnit",
+        "nodes": [
+            {
+                "id": 617,
+                "literals": [
+                    "solidity",
+                    "^",
+                    "0.8",
+                    ".0"
+                ],
+                "nodeType": "PragmaDirective",
+                "src": "40:23:5"
+            },
+            {
+                "id": 618,
+                "literals": [
+                    "abicoder",
+                    "v2"
+                ],
+                "nodeType": "PragmaDirective",
+                "src": "64:19:5"
+            },
+            {
+                "abstract": false,
+                "baseContracts": [],
+                "canonicalName": "IMemetaverseNFTFactory",
+                "contractDependencies": [],
+                "contractKind": "interface",
+                "fullyImplemented": false,
+                "id": 626,
+                "linearizedBaseContracts": [
+                    626
+                ],
+                "name": "IMemetaverseNFTFactory",
+                "nameLocation": "95:22:5",
+                "nodeType": "ContractDefinition",
+                "nodes": [
+                    {
+                        "functionSelector": "c0300011",
+                        "id": 625,
+                        "implemented": false,
+                        "kind": "function",
+                        "modifiers": [],
+                        "name": "isCollectionFromFactory",
+                        "nameLocation": "133:23:5",
+                        "nodeType": "FunctionDefinition",
+                        "parameters": {
+                            "id": 621,
+                            "nodeType": "ParameterList",
+                            "parameters": [
+                                {
+                                    "constant": false,
+                                    "id": 620,
+                                    "mutability": "mutable",
+                                    "name": "nft",
+                                    "nameLocation": "165:3:5",
+                                    "nodeType": "VariableDeclaration",
+                                    "scope": 625,
+                                    "src": "157:11:5",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_address",
+                                        "typeString": "address"
+                                    },
+                                    "typeName": {
+                                        "id": 619,
+                                        "name": "address",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "157:7:5",
+                                        "stateMutability": "nonpayable",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_address",
+                                            "typeString": "address"
+                                        }
+                                    },
+                                    "visibility": "internal"
+                                }
+                            ],
+                            "src": "156:13:5"
+                        },
+                        "returnParameters": {
+                            "id": 624,
+                            "nodeType": "ParameterList",
+                            "parameters": [
+                                {
+                                    "constant": false,
+                                    "id": 623,
+                                    "mutability": "mutable",
+                                    "name": "",
+                                    "nameLocation": "-1:-1:-1",
+                                    "nodeType": "VariableDeclaration",
+                                    "scope": 625,
+                                    "src": "192:4:5",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bool",
+                                        "typeString": "bool"
+                                    },
+                                    "typeName": {
+                                        "id": 622,
+                                        "name": "bool",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "192:4:5",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_bool",
+                                            "typeString": "bool"
+                                        }
+                                    },
+                                    "visibility": "internal"
+                                }
+                            ],
+                            "src": "191:6:5"
+                        },
+                        "scope": 626,
+                        "src": "124:74:5",
+                        "stateMutability": "view",
+                        "virtual": false,
+                        "visibility": "external"
+                    }
+                ],
+                "scope": 627,
+                "src": "85:115:5",
+                "usedErrors": []
+            }
+        ],
+        "src": "40:160:5"
+    },
+    "functionHashes": {
+        "isCollectionFromFactory(address)": "c0300011"
+    },
+    "gasEstimates": null
+}

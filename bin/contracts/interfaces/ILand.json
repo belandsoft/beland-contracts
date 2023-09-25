@@ -1,0 +1,183 @@
+{
+    "contractName": "ILand",
+    "abi": [
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "user",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256[]",
+                    "name": "landIds",
+                    "type": "uint256[]"
+                }
+            ],
+            "name": "batchCreate",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+    ],
+    "metadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"landIds\",\"type\":\"uint256[]\"}],\"name\":\"batchCreate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/data/Projects/mtv/memetaverse-contracts/contracts/interfaces/ILand.sol\":\"ILand\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/data/Projects/mtv/memetaverse-contracts/contracts/interfaces/ILand.sol\":{\"keccak256\":\"0x8df68adec074b5b8d98293aca1f979aca6eeb4e4f4da2574827bfb788db5ef53\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://12de607d27b7aed8d6385c74d4d9266384dabbe0034d899905e21a55ed0f2b2e\",\"dweb:/ipfs/QmXfHLvfVoZkVPRRQ41WGoPgFiSDjHqRszJyCtbEfw9hzo\"]}},\"version\":1}",
+    "bytecode": "",
+    "deployedBytecode": "",
+    "sourceMap": "",
+    "deployedSourceMap": "",
+    "sourcePath": "/data/Projects/mtv/memetaverse-contracts/contracts/interfaces/ILand.sol",
+    "compiler": {
+        "name": "solc",
+        "version": "0.8.19+commit.7dd6d404"
+    },
+    "ast": {
+        "absolutePath": "/data/Projects/mtv/memetaverse-contracts/contracts/interfaces/ILand.sol",
+        "exportedSymbols": {
+            "ILand": [
+                534
+            ]
+        },
+        "id": 535,
+        "license": "UNLICENSED",
+        "nodeType": "SourceUnit",
+        "nodes": [
+            {
+                "id": 524,
+                "literals": [
+                    "solidity",
+                    "^",
+                    "0.8",
+                    ".0"
+                ],
+                "nodeType": "PragmaDirective",
+                "src": "40:23:3"
+            },
+            {
+                "id": 525,
+                "literals": [
+                    "abicoder",
+                    "v2"
+                ],
+                "nodeType": "PragmaDirective",
+                "src": "64:19:3"
+            },
+            {
+                "abstract": false,
+                "baseContracts": [],
+                "canonicalName": "ILand",
+                "contractDependencies": [],
+                "contractKind": "interface",
+                "fullyImplemented": false,
+                "id": 534,
+                "linearizedBaseContracts": [
+                    534
+                ],
+                "name": "ILand",
+                "nameLocation": "95:5:3",
+                "nodeType": "ContractDefinition",
+                "nodes": [
+                    {
+                        "functionSelector": "e1758ab7",
+                        "id": 533,
+                        "implemented": false,
+                        "kind": "function",
+                        "modifiers": [],
+                        "name": "batchCreate",
+                        "nameLocation": "116:11:3",
+                        "nodeType": "FunctionDefinition",
+                        "parameters": {
+                            "id": 531,
+                            "nodeType": "ParameterList",
+                            "parameters": [
+                                {
+                                    "constant": false,
+                                    "id": 527,
+                                    "mutability": "mutable",
+                                    "name": "user",
+                                    "nameLocation": "136:4:3",
+                                    "nodeType": "VariableDeclaration",
+                                    "scope": 533,
+                                    "src": "128:12:3",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_address",
+                                        "typeString": "address"
+                                    },
+                                    "typeName": {
+                                        "id": 526,
+                                        "name": "address",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "128:7:3",
+                                        "stateMutability": "nonpayable",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_address",
+                                            "typeString": "address"
+                                        }
+                                    },
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 530,
+                                    "mutability": "mutable",
+                                    "name": "landIds",
+                                    "nameLocation": "159:7:3",
+                                    "nodeType": "VariableDeclaration",
+                                    "scope": 533,
+                                    "src": "142:24:3",
+                                    "stateVariable": false,
+                                    "storageLocation": "memory",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                                        "typeString": "uint256[]"
+                                    },
+                                    "typeName": {
+                                        "baseType": {
+                                            "id": 528,
+                                            "name": "uint256",
+                                            "nodeType": "ElementaryTypeName",
+                                            "src": "142:7:3",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_uint256",
+                                                "typeString": "uint256"
+                                            }
+                                        },
+                                        "id": 529,
+                                        "nodeType": "ArrayTypeName",
+                                        "src": "142:9:3",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                                            "typeString": "uint256[]"
+                                        }
+                                    },
+                                    "visibility": "internal"
+                                }
+                            ],
+                            "src": "127:40:3"
+                        },
+                        "returnParameters": {
+                            "id": 532,
+                            "nodeType": "ParameterList",
+                            "parameters": [],
+                            "src": "176:0:3"
+                        },
+                        "scope": 534,
+                        "src": "107:70:3",
+                        "stateMutability": "nonpayable",
+                        "virtual": false,
+                        "visibility": "external"
+                    }
+                ],
+                "scope": 535,
+                "src": "85:94:3",
+                "usedErrors": []
+            }
+        ],
+        "src": "40:139:3"
+    },
+    "functionHashes": {
+        "batchCreate(address,uint256[])": "e1758ab7"
+    },
+    "gasEstimates": null
+}

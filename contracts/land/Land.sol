@@ -37,7 +37,7 @@ contract Land is ERC721, Ownable {
         _;
     }
 
-    constructor() ERC721("BeLand", "BLAND") {}
+    constructor() ERC721("Memetaverse Land", "MVTLAND") {}
 
     function isOperator(address _operator, uint256 tokenId)
         external

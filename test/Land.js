@@ -5,7 +5,7 @@ const Land = artifacts.require("./Land.sol");
 contract("Land", ([owner, user, user2]) => {
   beforeEach(async () => {
     this.land = await Land.new();
-    await this.land.setBaseURI("beland.io/");
+    await this.land.setBaseURI("memetaverse.club/");
     await this.land.setMinter(owner, 1);
   });
 
@@ -21,7 +21,7 @@ contract("Land", ([owner, user, user2]) => {
     );
 
     const tokenURI = await this.land.tokenURI(10);
-    assert.equal(tokenURI, "beland.io/10");
+    assert.equal(tokenURI, "memetaverse.club/10");
 
     await expectRevert(
       this.land.create(owner, 90001, { from: owner }),
