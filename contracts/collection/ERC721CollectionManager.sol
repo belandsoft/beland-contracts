@@ -1,29 +1,27 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.3;
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "../common/EIP712.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../interfaces/IRarities.sol";
 import "../interfaces/IERC721Collection.sol";
 import "../interfaces/IForwarder.sol";
 import "../interfaces/IERC721CollectionFactory.sol";
+import "../common/EIP712.sol";
 
 contract ERC721CollectionManager is Ownable, EIP712 {
-
     using SafeMath for uint256;
-
     IERC20  public acceptedToken;
     IRarities public rarities;
+
     address public committee;
     address public feesCollector;
     uint256 public pricePerItem;
 
     mapping(bytes4 => bool) public allowedCommitteeMethods;
-
 
     event AcceptedTokenSet(IERC20 indexed _oldAcceptedToken, IERC20 indexed _newAcceptedToken);
     event CommitteeSet(address indexed _oldCommittee, address indexed _newCommittee);
@@ -144,23 +142,23 @@ contract ERC721CollectionManager is Ownable, EIP712 {
         string memory _symbol,
         string memory _baseURI,
         address _creator,
-        IERC721Collection.ItemParams[] memory _items
+        IERC721Collection.ItemParam[] memory _items
      ) external {
         require(address(_forwarder) != address(this), "CollectionManager#createCollection: FORWARDER_CANT_BE_THIS");
-        uint256 amount = 0;
+        uint256 creatingFees = 0;
 
         for (uint256 i = 0; i < _items.length; i++) {
-            IERC721Collection.ItemParams memory item = _items[i];
+            IERC721Collection.ItemParam memory item = _items[i];
 
             IRarities.Rarity memory rarity = rarities.getRarityByName(item.rarity);
 
-            amount = amount.add(rarity.price);
+            creatingFees = creatingFees.add(rarity.price);
         }
 
         // Transfer fees to collector
-        if (amount > 0) {
+        if (creatingFees > 0) {
             require(
-                acceptedToken.transferFrom(_msgSender(), feesCollector, amount),
+                acceptedToken.transferFrom(_msgSender(), feesCollector, creatingFees),
                 "CollectionManager#createCollection: TRANSFER_FEES_FAILED"
             );
         }
@@ -205,7 +203,7 @@ contract ERC721CollectionManager is Ownable, EIP712 {
 
         (success, res) = address(_collection).staticcall(abi.encodeWithSelector(_collection.COLLECTION_HASH.selector));
         require(
-            success && abi.decode(res, (bytes32)) == keccak256("Decentraland Collection"),
+            success && abi.decode(res, (bytes32)) == keccak256("Memetaverse Collection"),
             "CollectionManager#manageCollection: INVALID_COLLECTION"
         );
 

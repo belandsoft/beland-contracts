@@ -11,7 +11,7 @@ import "../interfaces/IRarities.sol";
 import "../libs/String.sol";
 
 
-abstract contract ERC721Collection is OwnableUpgradeable, ERC721Initializable, EIP712Upgradeable {
+contract ERC721Collection is OwnableUpgradeable, ERC721Initializable, EIP712Upgradeable {
     using String for bytes32;
     using String for uint256;
     using String for address;

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.3;
 pragma abicoder v2;
 
 import "../interfaces/IERC721Collection.sol";
@@ -101,7 +101,7 @@ contract MemetaverseNFTSale is Ownable, ReentrancyGuard {
                 quote.safeTransferFrom(_msgSender(), treasury, protocolFee);
             }
             netPrice = price.sub(refFee).sub(protocolFee);
-            quote.safeTransferFrom(_msgSender(), item.treasury, netPrice);
+            quote.safeTransferFrom(_msgSender(), item.beneficiary, netPrice);
         }
 
         address[] memory beneficiaries = new address[](_qty);

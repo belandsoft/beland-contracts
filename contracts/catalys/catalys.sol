@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.3;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract CatalysApp is Ownable {
-    /// Errors
     string constant ERROR_OWNER_IN_USE = "ERROR_OWNER_IN_USE";
     string constant ERROR_DOMAIN_IN_USE = "ERROR_DOMAIN_IN_USE";
     string constant ERROR_ID_IN_USE = "ERROR_ID_IN_USE";

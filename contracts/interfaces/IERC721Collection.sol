@@ -39,5 +39,5 @@ interface IERC721Collection {
         ItemParam[] memory _items
     ) external;
     function items(uint256 _itemId) external view returns (string memory, uint256, uint256, uint256, address, string memory, string memory);
-    function getItem(uint256 _itemId) external view returns (Item memory)
+    function getItem(uint256 _itemId) external view returns (Item memory);
 }
