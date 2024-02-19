@@ -3,8 +3,7 @@
 pragma solidity ^0.8.0;
 pragma abicoder v2;
 
-import "./MemetaverseNFT.sol";
-import "../interfaces/IMemetaverseNFT.sol";
+import "../interfaces/IERC721Collection.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../interfaces/IReferral.sol";
@@ -37,11 +36,7 @@ contract MemetaverseNFTSale is Ownable, ReentrancyGuard {
     event TreasuryUpdated(address treasury);
     event SetDealToken(address token);
 
-    constructor(
-        address _treasury,
-        address _dealToken,
-        address _referral
-    ) {
+    constructor(address _treasury, address _dealToken, address _referral) {
         treasury = _treasury;
         dealToken = _dealToken;
         referral = _referral;
@@ -88,7 +83,9 @@ contract MemetaverseNFTSale is Ownable, ReentrancyGuard {
         uint256 _qty,
         address _referrer
     ) external nonReentrant {
-        IMemetaverseNFT.Item memory item = IMemetaverseNFT(_nft).getItem(_itemId);
+        IERC721Collection.Item memory item = IERC721Collection(_nft).getItem(
+            _itemId
+        );
 
         uint256 pricePerUnit = item.price;
         uint256 price;
@@ -106,21 +103,32 @@ contract MemetaverseNFTSale is Ownable, ReentrancyGuard {
             netPrice = price.sub(refFee).sub(protocolFee);
             quote.safeTransferFrom(_msgSender(), item.treasury, netPrice);
         }
-        IMemetaverseNFT(_nft).batchCreate(_msgSender(), _itemId, _qty);
+
+        address[] memory beneficiaries = new address[](_qty);
+        uint256[] memory items = new uint256[](_qty);
+
+        for (uint256 i = 0; i < _qty; i++) {
+            beneficiaries[i] = _msgSender();
+            items[i] = _itemId;
+        }
+        IERC721Collection(_nft).issueTokens(beneficiaries, items);
         emit Buy(_msgSender(), _nft, _itemId, _qty, price, netPrice);
     }
 
     function _recordReferral(address _referrer) private {
-        if (_referrer != address(0) && _referrer != _msgSender() && referral != address(0)) {
+        if (
+            _referrer != address(0) &&
+            _referrer != _msgSender() &&
+            referral != address(0)
+        ) {
             IReferral(referral).recordReferral(_msgSender(), _referrer);
         }
     }
 
-    function _payReferralCommission(uint256 amount)
-        internal
-        returns (uint256 commission)
-    {
-        if (referralCommisionRate > 0  && referral != address(0)) {
+    function _payReferralCommission(
+        uint256 amount
+    ) internal returns (uint256 commission) {
+        if (referralCommisionRate > 0 && referral != address(0)) {
             address referrer = IReferral(referral).getReferrer(_msgSender());
             if (referrer != address(0)) {
                 commission = amount.mul(referralCommisionRate).div(10000);
