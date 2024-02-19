@@ -10,8 +10,9 @@ import "../interfaces/IReferral.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "../common/EIP712.sol";
 
-contract MemetaverseNFTSale is Ownable, ReentrancyGuard {
+contract ERC721CollectionSale is Ownable, ReentrancyGuard,EIP712 {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -36,7 +37,7 @@ contract MemetaverseNFTSale is Ownable, ReentrancyGuard {
     event TreasuryUpdated(address treasury);
     event SetDealToken(address token);
 
-    constructor(address _treasury, address _dealToken, address _referral) {
+    constructor(address _treasury, address _dealToken, address _referral) EIP712("Memetaverse Collection Sale", "1"){
         treasury = _treasury;
         dealToken = _dealToken;
         referral = _referral;
