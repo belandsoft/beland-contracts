@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.3;
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "../common/EIP712.sol";
+import "../common/NativeMetaTransaction.sol";
 import "../libs/String.sol";
 
-contract Rarities is Ownable, EIP712 {
+contract Rarities is Ownable, NativeMetaTransaction {
     using String for string;
 
     struct Rarity {
@@ -25,7 +25,7 @@ contract Rarities is Ownable, EIP712 {
    /**
     * @notice Create the contract
     */
-    constructor(Rarity[] memory _rarities) EIP712("Memetaverse Rarities", "1"){
+    constructor(Rarity[] memory _rarities) NativeMetaTransaction("Memetaverse Rarities", "1"){
         for (uint256 i = 0 ; i < _rarities.length; i++) {
             _addRarity(_rarities[i]);
         }

@@ -10,9 +10,9 @@ import "../interfaces/IRarities.sol";
 import "../interfaces/IERC721Collection.sol";
 import "../interfaces/IForwarder.sol";
 import "../interfaces/IERC721CollectionFactory.sol";
-import "../common/EIP712.sol";
+import "../common/NativeMetaTransaction.sol";
 
-contract ERC721CollectionManager is Ownable, EIP712 {
+contract ERC721CollectionManager is Ownable, NativeMetaTransaction {
     using SafeMath for uint256;
     IERC20  public acceptedToken;
     IRarities public rarities;
@@ -47,7 +47,7 @@ contract ERC721CollectionManager is Ownable, EIP712 {
         IRarities _rarities,
         bytes4[] memory _committeeMethods,
         bool[] memory _committeeValues
-    ) EIP712("Memetaverse Collection Manager", "1"){
+    ) NativeMetaTransaction("Memetaverse Collection Manager", "1"){
         setAcceptedToken(_acceptedToken);
 
         // Committee

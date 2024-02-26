@@ -9,9 +9,10 @@ import "../common/ERC721Initializable.sol";
 import "../common/EIP712Upgradeable.sol";
 import "../interfaces/IRarities.sol";
 import "../libs/String.sol";
+import "../common/NativeMetaTransactionUpgradeable.sol";
 
 
-contract ERC721Collection is OwnableUpgradeable, ERC721Initializable, EIP712Upgradeable {
+contract ERC721Collection is OwnableUpgradeable, ERC721Initializable, NativeMetaTransactionUpgradeable {
     using String for bytes32;
     using String for uint256;
     using String for address;
@@ -74,18 +75,6 @@ contract ERC721Collection is OwnableUpgradeable, ERC721Initializable, EIP712Upgr
     event SetEditable(bool _previousValue, bool _newValue);
     event Complete();
 
-   /*
-    * Init functions
-    */
-
-    /**
-     * @notice Init the contract
-     */
-    function initImplementation() public {
-        require(!isInitialized, "initialize: ALREADY_INITIALIZED");
-        isInitialized = true;
-    }
-
     /**
      * @notice Create the contract
      * @param _name - name of the contract
@@ -106,16 +95,14 @@ contract ERC721Collection is OwnableUpgradeable, ERC721Initializable, EIP712Upgr
         bool _isApproved,
         IRarities _rarities,
         ItemParam[] memory _items
-    ) external virtual {
-        initImplementation();
-
+    ) external initializer {
         require(_creator != address(0), "initialize: INVALID_CREATOR");
         require(address(_rarities) != address(0), "initialize: INVALID_RARITIES");
 
         // Ownable init
         __Ownable_init();
         // EIP712 init
-        __EIP712_init('Memetaverse Collection', '1');
+        __NativeMetaTransaction_init('Memetaverse Collection', '1');
         // ERC721 init
         __ERC721_init(_name, _symbol);
         // Base URI init

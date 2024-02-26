@@ -1,144 +1,135 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.3;
-pragma abicoder v2;
+pragma solidity ^0.8.0;
+pragma experimental ABIEncoderV2;
 
+
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "../common/NativeMetaTransaction.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "../interfaces/IERC721Collection.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "../interfaces/IReferral.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "../common/EIP712.sol";
 
-contract ERC721CollectionSale is Ownable, ReentrancyGuard,EIP712 {
+contract ERC721CollectionSale is Ownable, NativeMetaTransaction {
     using SafeMath for uint256;
-    using SafeERC20 for IERC20;
 
-    address public treasury;
-    address public dealToken;
-    uint256 public feePercent = 100; // 1%
-    address public referral;
-    uint256 public maxFeePercent = 1000; // 10%;
-    uint256 public referralCommisionRate = 50; // 1%
 
-    event Buy(
-        address user,
-        address indexed nft,
-        uint256 itemId,
-        uint256 qty,
-        uint256 price,
-        uint256 netPrice
-    );
-    event FeePercentUpdated(uint256 feePercent);
-    event ReferalUpdated(address referral);
-    event ReferralCommisionRateUpdated(uint256 newRate);
-    event TreasuryUpdated(address treasury);
-    event SetDealToken(address token);
-
-    constructor(address _treasury, address _dealToken, address _referral) EIP712("Memetaverse Collection Sale", "1"){
-        treasury = _treasury;
-        dealToken = _dealToken;
-        referral = _referral;
+    struct ItemToBuy {
+        IERC721Collection collection;
+        uint256[] ids;
+        uint256[] prices;
+        address[] beneficiaries;
     }
 
-    function setReferral(address _referral) external onlyOwner {
-        require(_referral != address(0), "zero addr");
-        referral = _referral;
-        emit ReferalUpdated(_referral);
-    }
+    uint256 constant public BASE_FEE = 1000000;
+    IERC20 public acceptedToken;
+    uint256 public fee;
+    address public feeOwner;
 
-    function setTreasury(address _treasury) external onlyOwner {
-        require(_treasury != address(0), "zero addr");
-        treasury = _treasury;
-        emit TreasuryUpdated(_treasury);
-    }
+    event Bought(ItemToBuy[] _itemsToBuy);
+    event SetFee(uint256 _oldFee, uint256 _newFee);
+    event SetFeeOwner(address indexed _oldFeeOwner, address indexed _newFeeOwner);
 
-    function setDealToken(address _token) external onlyOwner {
-        require(_token != address(0), "zero addr");
-        dealToken = _token;
-        emit SetDealToken(_token);
-    }
+    /**
+    * @notice Constructor of the contract.
+    * @param _acceptedToken - Address of the ERC20 token accepted
+    * @param _feeOwner - address where fees will be transferred
+    * @param _fee - fee to charge for each sale
+    */
+    constructor(address _owner, IERC20 _acceptedToken, address _feeOwner, uint256 _fee) NativeMetaTransaction("Memetaverse Collection Sale", "1") {
+        acceptedToken = _acceptedToken;
+        feeOwner = _feeOwner;
+        setFee(_fee);
 
-    function setFeePercent(uint256 _percent) external onlyOwner {
-        require(_percent <= maxFeePercent, "MemetaverseNFTPresale: max fee");
-        feePercent = _percent;
-        emit FeePercentUpdated(_percent);
-    }
-
-    function setReferralCommisionRate(uint256 _percent) external onlyOwner {
-        require(_percent <= maxFeePercent, "MemetaverseNFTPresale: max fee");
-        referralCommisionRate = _percent;
-        emit ReferralCommisionRateUpdated(_percent);
+        transferOwnership(_owner);
     }
 
     /**
-     * @notice buy nft
-     * @param _nft: address of nft
-     * @param _qty: quantity
+    * @notice Buy collection's items.
+    * @dev There is a maximum amount of NFTs that can be issued per call by the block's limit.
+    * @param _itemsToBuy - items to buy
+    */
+    function buy(ItemToBuy[] memory _itemsToBuy) external {
+        uint256 totalFee = 0;
+        address sender = _msgSender();
+
+        for (uint256 i = 0; i < _itemsToBuy.length; i++) {
+            ItemToBuy memory itemToBuy = _itemsToBuy[i];
+            IERC721Collection collection = itemToBuy.collection;
+            uint256 amountOfItems = itemToBuy.ids.length;
+
+            require(amountOfItems == itemToBuy.prices.length, "CollectionStore#buy: LENGTH_MISMATCH");
+
+            for (uint256 j = 0; j < amountOfItems; j++) {
+                uint256 itemId = itemToBuy.ids[j];
+                uint256 price = itemToBuy.prices[j];
+
+                (uint256 itemPrice, address itemBeneficiary) = getItemBuyData(collection, itemId);
+                require(price == itemPrice, "CollectionStore#buy: ITEM_PRICE_MISMATCH");
+
+                if (itemPrice > 0) {
+                    // Calculate sale share
+                    uint256 saleShareAmount = itemPrice.mul(fee).div(BASE_FEE);
+                    totalFee = totalFee.add(saleShareAmount);
+
+                    // Transfer sale amount to the item beneficiary
+                    require(
+                        acceptedToken.transferFrom(sender, itemBeneficiary, itemPrice.sub(saleShareAmount)),
+                        "CollectionStore#buy: TRANSFER_PRICE_FAILED"
+                    );
+                }
+            }
+
+            // Mint Token
+            collection.issueTokens(itemToBuy.beneficiaries, itemToBuy.ids);
+        }
+
+        if (totalFee > 0) {
+            // Transfer share amount for fees owner
+            require(
+                acceptedToken.transferFrom(sender, feeOwner, totalFee),
+                "CollectionStore#buy: TRANSFER_FEES_FAILED"
+            );
+        }
+        emit Bought(_itemsToBuy);
+    }
+
+    /**
+     * @notice Get item's price and beneficiary
+     * @param _collection - collection address
+     * @param _itemId - item id
+     * @return uint256 of the item's price
+     * @return address of the item's beneficiary
      */
-    function buy(
-        address _nft,
-        uint256 _itemId,
-        uint256 _qty,
-        address _referrer
-    ) external nonReentrant {
-        IERC721Collection.Item memory item = IERC721Collection(_nft).getItem(
-            _itemId
-        );
-
-        uint256 pricePerUnit = item.price;
-        uint256 price;
-        uint256 netPrice;
-        if (pricePerUnit > 0) {
-            _recordReferral(_referrer);
-            IERC20 quote = IERC20(dealToken);
-            // pay commission fee + protocol fee;
-            price = pricePerUnit.mul(_qty);
-            uint256 refFee = _payReferralCommission(price);
-            uint256 protocolFee = price.mul(feePercent).div(10000);
-            if (protocolFee > 0) {
-                quote.safeTransferFrom(_msgSender(), treasury, protocolFee);
-            }
-            netPrice = price.sub(refFee).sub(protocolFee);
-            quote.safeTransferFrom(_msgSender(), item.beneficiary, netPrice);
-        }
-
-        address[] memory beneficiaries = new address[](_qty);
-        uint256[] memory items = new uint256[](_qty);
-
-        for (uint256 i = 0; i < _qty; i++) {
-            beneficiaries[i] = _msgSender();
-            items[i] = _itemId;
-        }
-        IERC721Collection(_nft).issueTokens(beneficiaries, items);
-        emit Buy(_msgSender(), _nft, _itemId, _qty, price, netPrice);
+    function getItemBuyData(IERC721Collection _collection, uint256 _itemId) public view returns (uint256, address) {
+      (,,,uint256 price, address beneficiary,,) = _collection.items(_itemId);
+       return (price, beneficiary);
     }
 
-    function _recordReferral(address _referrer) private {
-        if (
-            _referrer != address(0) &&
-            _referrer != _msgSender() &&
-            referral != address(0)
-        ) {
-            IReferral(referral).recordReferral(_msgSender(), _referrer);
-        }
+    // Owner functions
+
+    /**
+     * @notice Sets the fee of the contract that's charged to the seller on each sale
+     * @param _newFee - Fee from 0 to 999,999
+     */
+    function setFee(uint256 _newFee) public onlyOwner {
+        require(_newFee < BASE_FEE, "CollectionStore#setFee: FEE_SHOULD_BE_LOWER_THAN_BASE_FEE");
+        require(_newFee != fee, "CollectionStore#setFee: SAME_FEE");
+
+        emit SetFee(fee, _newFee);
+        fee = _newFee;
     }
 
-    function _payReferralCommission(
-        uint256 amount
-    ) internal returns (uint256 commission) {
-        if (referralCommisionRate > 0 && referral != address(0)) {
-            address referrer = IReferral(referral).getReferrer(_msgSender());
-            if (referrer != address(0)) {
-                commission = amount.mul(referralCommisionRate).div(10000);
-                IERC20(dealToken).safeTransferFrom(
-                    _msgSender(),
-                    referrer,
-                    commission
-                );
-            }
-        }
+    /**
+     * @notice Set a new fee owner.
+    * @param _newFeeOwner - Address of the new fee owner
+     */
+    function setFeeOwner(address _newFeeOwner) external onlyOwner {
+        require(_newFeeOwner != address(0), "CollectionStore#setFeeOwner: INVALID_ADDRESS");
+        require(_newFeeOwner != feeOwner, "CollectionStore#setFeeOwner: SAME_FEE_OWNER");
+
+        emit SetFeeOwner(feeOwner, _newFeeOwner);
+        feeOwner = _newFeeOwner;
     }
 }
