@@ -17,7 +17,6 @@ import "../common/ContractIndexVerifiable.sol";
 import "../common/SignerIndexVerifiable.sol";
 import "../common/AssetIndexVerifiable.sol";
 
-
 contract Rentals is
     OwnableUpgradeable,
     IERC721Receiver,
@@ -157,6 +156,10 @@ contract Rentals is
         _setFee(_fee);
 
         token = _token;
+    }
+
+    function _msgSender() internal override view returns (address) {
+        return _getMsgSender();
     }
 
     /// @notice Pause the contract and prevent core functions from being called.
