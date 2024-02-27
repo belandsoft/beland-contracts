@@ -51,17 +51,13 @@ contract Rentals is
     /// @dev EIP165 hash used to detect if a contract supports the onERC721Received(address,address,uint256,bytes) function.
     bytes4 private constant InterfaceId_OnERC721Received = bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
 
-    /// @notice ERC20 token used to pay for rent and fees.
     IERC20 private token;
 
-    /// @notice Tracks necessary rental data per asset.
-    /// @custom:schema (contract address -> token id -> rental)
+
     mapping(address => mapping(uint256 => Rental)) internal rentals;
 
-    /// @notice Address that will receive ERC20 tokens collected as rental fees.
     address private feeCollector;
 
-    /// @notice Value per million wei that will be deducted from the rental price and sent to the collector.
     uint256 private fee;
 
     /// @notice Struct received as a parameter in `acceptListing` containing all information about

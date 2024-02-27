@@ -5,9 +5,6 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
 abstract contract AssetIndexVerifiable is ContextUpgradeable {
-    /// @notice Current index per asset per signer.
-    /// Updating it will invalidate all signatures created with the previous value on an asset level.
-    /// @custom:schema (contract address -> token id -> signer address -> index)
     mapping(address => mapping(uint256 => mapping(address => uint256))) private assetIndex;
 
     event AssetIndexUpdated(address indexed _signer, address indexed _contractAddress, uint256 indexed _tokenId, uint256 _newIndex, address _sender);

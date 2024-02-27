@@ -5,9 +5,6 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
 abstract contract SignerIndexVerifiable is ContextUpgradeable {
-    /// @notice Current index per signer.
-    /// Updating it will invalidate all signatures created with the previous value on a signer level.
-    /// @custom:schema (signer address -> index)
     mapping(address => uint256) private signerIndex;
 
     event SignerIndexUpdated(address indexed _signer, uint256 _newIndex, address _sender);

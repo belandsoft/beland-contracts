@@ -9,7 +9,6 @@ abstract contract NativeMetaTransactionUpgradeable is EIP712Upgradeable {
     /// @dev EIP712 type hash for recovering the signer from the signature.
     bytes32 private constant META_TRANSACTION_TYPEHASH = keccak256(bytes("MetaTransaction(uint256 nonce,address from,bytes functionData)"));
 
-    /// @notice Track signer nonces so the same signature cannot be used more than once.
     mapping(address => uint256) private nonces;
 
     /// @notice Struct with the data required to verify that the signature signer is the same as `from`.

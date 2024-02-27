@@ -5,8 +5,6 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 abstract contract ContractIndexVerifiable is OwnableUpgradeable {
-    /// @notice Current index at a contract level. Only updatable by the owner of the contract.
-    /// Updating it will invalidate all signatures created with the previous value on a contract level.
     uint256 private contractIndex;
 
     event ContractIndexUpdated(uint256 _newIndex, address _sender);
