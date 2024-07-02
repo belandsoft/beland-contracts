@@ -31,3 +31,4 @@ coverage
 build
 artifacts
 cache
+typechain-types
