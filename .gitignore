@@ -32,3 +32,5 @@ build
 artifacts
 cache
 typechain-types
+*.states
+*.deps

@@ -8,14 +8,13 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../common/ERC721Initializable.sol";
 import "../common/EIP712Upgradeable.sol";
 import "../interfaces/IRarities.sol";
-import "../libs/String.sol";
 import "../common/NativeMetaTransactionUpgradeable.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 
 contract ERC721Collection is OwnableUpgradeable, ERC721Initializable, NativeMetaTransactionUpgradeable {
-    using String for bytes32;
-    using String for uint256;
-    using String for address;
+    
+    using StringsUpgradeable for uint256;
     using SafeMath for uint256;
 
     bytes32 constant public COLLECTION_HASH = keccak256("Memetaverse Collection");
@@ -102,7 +101,7 @@ contract ERC721Collection is OwnableUpgradeable, ERC721Initializable, NativeMeta
         // Ownable init
         __Ownable_init();
         // EIP712 init
-        __NativeMetaTransaction_init('Memetaverse Collection', '1');
+        __EIP712_init('Memetaverse Collection', '1');
         // ERC721 init
         __ERC721_init(_name, _symbol);
         // Base URI init
@@ -562,6 +561,14 @@ contract ERC721Collection is OwnableUpgradeable, ERC721Initializable, NativeMeta
         _setBaseURI(_baseURI);
     }
 
+    function getChainID() public view returns (uint256) {
+        uint id;
+        assembly {
+            id := chainid()
+        }
+        return id;
+    }
+
     /**
      * @notice Returns an URI for a given token ID.
      * Throws if the token ID does not exist. May return an empty string.
@@ -573,22 +580,18 @@ contract ERC721Collection is OwnableUpgradeable, ERC721Initializable, NativeMeta
 
         (uint256 itemId, uint256 issuedId) = decodeTokenId(_tokenId);
 
-        uint256 id;
-        assembly {
-            id := chainid()
-        }
+        uint256 id = getChainID();
 
         return string(
             abi.encodePacked(
                 baseURI(),
-                id.uintToString(),
+                id.toString(),
                 "/",
-                "0x",
-                address(this).addressToString(),
+                Strings.toHexString(uint256(uint160(address(this))), 20),
                 "/",
-                itemId.uintToString(),
+                itemId.toString(),
                 "/",
-                issuedId.uintToString()
+                issuedId.toString()
             )
         );
     }

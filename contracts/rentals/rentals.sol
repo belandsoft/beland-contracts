@@ -146,16 +146,12 @@ contract Rentals is
         __Ownable_init();
         __ReentrancyGuard_init();
         __Pausable_init();
-        __NativeMetaTransaction_init("Memetaverse Rentals", "1");
+        __EIP712_init("Memetaverse Rentals", "1");
         _transferOwnership(_owner);
         _setFeeCollector(_feeCollector);
         _setFee(_fee);
 
         token = _token;
-    }
-
-    function _msgSender() internal override view returns (address) {
-        return _getMsgSender();
     }
 
     /// @notice Pause the contract and prevent core functions from being called.
@@ -517,7 +513,7 @@ contract Rentals is
     function _verifyListingSigner(Listing calldata _listing) private view {
         address listingSigner = _listing.signer;
 
-        bytes32 listingHash = _hashTypedDataV4(
+        bytes32 listingHash = toTypedMessageHash(
             keccak256(
                 abi.encode(
                     LISTING_TYPE_HASH,
@@ -541,7 +537,7 @@ contract Rentals is
     function _verifyOfferSigner(Offer memory _offer) private view {
         address offerSigner = _offer.signer;
 
-        bytes32 offerHash = _hashTypedDataV4(
+        bytes32 offerHash = toTypedMessageHash(
             keccak256(
                 abi.encode(
                     OFFER_TYPE_HASH,

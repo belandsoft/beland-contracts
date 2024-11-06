@@ -3,8 +3,8 @@
 pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
-abstract contract ERC721Initializable is ERC721URIStorageUpgradeable {
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+abstract contract ERC721Initializable is ERC721Upgradeable {
     // Base URI
     string private __baseURI;
 
